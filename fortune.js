@@ -1,4 +1,20 @@
-// api/fortune.js — GraphRAG 방식 별자리 운세 분석 API
+// OpenAI 대신 Claude 사용 시
+const response = await fetch('https://api.anthropic.com/v1/messages', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-api-key': process.env.ANTHROPIC_API_KEY,
+    'anthropic-version': '2023-06-01'
+  },
+  body: JSON.stringify({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 1000,
+    system: systemPrompt,
+    messages: [{ role: 'user', content: userPrompt }]
+  })
+});
+const aiData = await response.json();
+const content = aiData.content[0].text;
 // Vercel Serverless Function
 
 export default async function handler(req, res) {

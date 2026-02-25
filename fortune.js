@@ -1,7 +1,7 @@
 // api/fortune.js — GraphRAG 방식 별자리 운세 분석 API
 // Vercel Serverless Function
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');

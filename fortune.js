@@ -154,6 +154,22 @@ ${concernPart}
 
   } catch (err) {
     console.error('Fortune API Error:', err);
-    return res.status(500).json({ error: '운세 분석 중 오류가 발생했습니다.' });
+    const msg = err?.message || String(err);
+
+    // 원인별 한국어 안내
+    let guide = '운세 분석 중 오류가 발생했습니다.';
+    if (!process.env.ANTHROPIC_API_KEY) {
+      guide = '❌ ANTHROPIC_API_KEY 환경변수가 설정되지 않았습니다. Vercel Settings > Environment Variables를 확인하세요.';
+    } else if (msg.includes('401') || msg.includes('authentication')) {
+      guide = '❌ API 키가 올바르지 않습니다. Vercel의 ANTHROPIC_API_KEY 값을 다시 확인하세요.';
+    } else if (msg.includes('429') || msg.includes('rate')) {
+      guide = '⚠️ API 호출 한도를 초과했습니다. 잠시 후 다시 시도해주세요.';
+    } else if (msg.includes('JSON') || msg.includes('parse')) {
+      guide = '⚠️ AI 응답 파싱 오류입니다. 다시 시도해주세요.';
+    } else if (msg.includes('fetch') || msg.includes('network')) {
+      guide = '⚠️ 네트워크 연결 오류입니다. 잠시 후 다시 시도해주세요.';
+    }
+
+    return res.status(500).json({ error: guide, debug: msg });
   }
 }

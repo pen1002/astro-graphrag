@@ -1,20 +1,4 @@
-// OpenAI 대신 Claude 사용 시
-const response = await fetch('https://api.anthropic.com/v1/messages', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'x-api-key': process.env.ANTHROPIC_API_KEY,
-    'anthropic-version': '2023-06-01'
-  },
-  body: JSON.stringify({
-    model: 'claude-haiku-4-5-20251001',
-    max_tokens: 1000,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: userPrompt }]
-  })
-});
-const aiData = await response.json();
-const content = aiData.content[0].text;
+// api/fortune.js — GraphRAG 방식 별자리 운세 분석 API
 // Vercel Serverless Function
 
 export default async function handler(req, res) {
@@ -137,33 +121,34 @@ ${concernPart}
 }`;
 
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        temperature: 0.85,
-        max_tokens: 1000,
-        response_format: { type: 'json_object' }
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
       })
     });
 
     if (!response.ok) {
       const err = await response.text();
-      console.error('OpenAI error:', err);
-      throw new Error('OpenAI API 오류');
+      console.error('Claude API error:', err);
+      throw new Error('Claude API 오류');
     }
 
     const aiData = await response.json();
-    const content = aiData.choices[0].message.content;
-    const result = JSON.parse(content);
+    const raw = aiData.content[0].text;
+
+    // JSON 블록 추출 (마크다운 코드블록 또는 순수 JSON)
+    const jsonMatch = raw.match(/```json\s*([\s\S]*?)```/) || raw.match(/(\{[\s\S]*\})/);
+    const jsonStr = jsonMatch ? jsonMatch[1] : raw;
+    const result = JSON.parse(jsonStr.trim());
 
     return res.status(200).json(result);
 

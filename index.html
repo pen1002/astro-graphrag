@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌌 별자리 운명의 그물 — GraphRAG 심층 운세</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700&family=Cinzel+Decorative:wght@400;700&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.9/vis-network.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.9/dist/vis-network.min.css">
+<style>
+  :root {
+    --void: #03010a;
+    --deep: #08021a;
+    --cosmos: #0d0528;
+    --nebula: #1a0a45;
+    --violet: #6b21a8;
+    --aurora: #9333ea;
+    --star: #e9d5ff;
+    --gold: #fbbf24;
+    --silver: #c4b5fd;
+    --glow: rgba(147,51,234,0.4);
+    --sun-color: #fbbf24;
+    --moon-color: #93c5fd;
+    --rising-color: #6ee7b7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--void);
+    color: var(--star);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* 우주 배경 파티클 */
+  #starfield {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  /* 헤더 */
+  header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  header .subtitle {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    color: var(--aurora);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    opacity: 0.8;
+  }
+
+  header h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--silver) 50%, var(--aurora) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.4;
+    margin-bottom: 12px;
+  }
+
+  header p.desc {
+    font-size: 0.85rem;
+    color: rgba(196,181,253,0.7);
+    font-weight: 300;
+    line-height: 1.7;
+  }
+
+  /* 설명 배너 */
+  .graphrag-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(107,33,168,0.3), rgba(147,51,234,0.2));
+    border: 1px solid rgba(147,51,234,0.4);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.72rem;
+    color: var(--silver);
+    margin-top: 16px;
+    letter-spacing: 0.05em;
+  }
+
+  /* 입력 섹션 */
+  .input-section {
+    background: linear-gradient(135deg, rgba(13,5,40,0.9), rgba(26,10,69,0.6));
+    border: 1px solid rgba(107,33,168,0.4);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 30px;
+    backdrop-filter: blur(10px);
+  }
+
+  .section-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    color: var(--aurora);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(147,51,234,0.5), transparent);
+  }
+
+  /* 3개 별자리 그리드 */
+  .signs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .sign-card {
+    background: rgba(0,0,0,0.3);
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid rgba(107,33,168,0.25);
+    transition: all 0.3s ease;
+  }
+
+  .sign-card:hover {
+    border-color: rgba(147,51,234,0.5);
+    transform: translateY(-2px);
+  }
+
+  .sign-card .card-label {
+    font-size: 0.7rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+
+  .sign-card.sun .card-label { color: var(--sun-color); }
+  .sign-card.moon .card-label { color: var(--moon-color); }
+  .sign-card.rising .card-label { color: var(--rising-color); }
+
+  .sign-card .card-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .sign-card.sun .card-dot { background: var(--sun-color); box-shadow: 0 0 6px var(--sun-color); }
+  .sign-card.moon .card-dot { background: var(--moon-color); box-shadow: 0 0 6px var(--moon-color); }
+  .sign-card.rising .card-dot { background: var(--rising-color); box-shadow: 0 0 6px var(--rising-color); }
+
+  .sign-card select {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(107,33,168,0.3);
+    color: var(--star);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239333ea' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+
+  .sign-card select:focus {
+    border-color: var(--aurora);
+  }
+
+  .sign-card select option {
+    background: var(--deep);
+    color: var(--star);
+  }
+
+  /* 고민 입력 */
+  .concern-box {
+    margin-bottom: 8px;
+  }
+
+  .concern-box label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--silver);
+    margin-bottom: 8px;
+    letter-spacing: 0.1em;
+  }
+
+  .concern-box textarea {
+    width: 100%;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(107,33,168,0.3);
+    color: var(--star);
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    resize: none;
+    outline: none;
+    line-height: 1.6;
+    transition: border-color 0.3s;
+  }
+
+  .concern-box textarea:focus {
+    border-color: var(--aurora);
+  }
+
+  .concern-box textarea::placeholder {
+    color: rgba(196,181,253,0.35);
+  }
+
+  /* 버튼 */
+  .btn-analyze {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--violet), var(--aurora));
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    margin-top: 20px;
+  }
+
+  .btn-analyze::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .btn-analyze:hover::before { left: 100%; }
+  .btn-analyze:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(147,51,234,0.5); }
+  .btn-analyze:active { transform: translateY(0); }
+  .btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* 로딩 */
+  .loading-state {
+    display: none;
+    text-align: center;
+    padding: 50px 20px;
+  }
+
+  .loading-state.active { display: block; }
+
+  .orbit-loader {
+    width: 60px; height: 60px;
+    margin: 0 auto 20px;
+    position: relative;
+  }
+
+  .orbit-loader .planet {
+    width: 12px; height: 12px;
+    background: var(--aurora);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform-origin: -18px 0;
+    animation: orbit 1.8s linear infinite;
+    box-shadow: 0 0 10px var(--aurora);
+  }
+
+  .orbit-loader .planet:nth-child(2) {
+    background: var(--gold);
+    transform-origin: -28px 0;
+    animation-duration: 2.4s;
+    animation-delay: -0.6s;
+    width: 8px; height: 8px;
+  }
+
+  .orbit-loader .planet:nth-child(3) {
+    background: var(--moon-color);
+    transform-origin: -12px 0;
+    animation-duration: 1.2s;
+    animation-delay: -1.2s;
+    width: 6px; height: 6px;
+  }
+
+  @keyframes orbit {
+    from { transform: translate(-50%, -50%) rotate(0deg) translateX(28px); }
+    to { transform: translate(-50%, -50%) rotate(360deg) translateX(28px); }
+  }
+
+  .loading-steps {
+    font-size: 0.8rem;
+    color: var(--silver);
+    line-height: 2;
+  }
+
+  .loading-step {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .loading-step.active { opacity: 1; }
+  .loading-step .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--aurora); }
+
+  /* 결과 영역 */
+  .result-section {
+    display: none;
+  }
+
+  .result-section.active { display: block; }
+
+  /* 그래프 시각화 */
+  .graph-container {
+    background: linear-gradient(135deg, rgba(13,5,40,0.95), rgba(8,2,26,0.95));
+    border: 1px solid rgba(107,33,168,0.4);
+    border-radius: 16px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+
+  .graph-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(107,33,168,0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .graph-header h3 {
+    font-size: 0.78rem;
+    letter-spacing: 0.2em;
+    color: var(--silver);
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+
+  .pulse-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--aurora);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(147,51,234,0.7); }
+    50% { box-shadow: 0 0 0 6px rgba(147,51,234,0); }
+  }
+
+  #graph-canvas {
+    height: 280px;
+    width: 100%;
+  }
+
+  /* 분석 결과 카드 */
+  .analysis-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .analysis-card {
+    background: linear-gradient(135deg, rgba(13,5,40,0.9), rgba(26,10,69,0.5));
+    border: 1px solid rgba(107,33,168,0.3);
+    border-radius: 16px;
+    padding: 24px;
+    animation: fadeSlideIn 0.6s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .analysis-card:nth-child(1) { animation-delay: 0.1s; }
+  .analysis-card:nth-child(2) { animation-delay: 0.25s; }
+  .analysis-card:nth-child(3) { animation-delay: 0.4s; }
+
+  .card-title {
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title .icon { font-size: 1rem; }
+
+  .card-title.path { color: var(--gold); }
+  .card-title.deep { color: var(--aurora); }
+  .card-title.action { color: var(--rising-color); }
+
+  .card-body {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.92rem;
+    line-height: 1.9;
+    color: rgba(233,213,255,0.9);
+    font-weight: 300;
+  }
+
+  /* 관계 경로 태그 */
+  .path-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .path-tag {
+    background: rgba(107,33,168,0.25);
+    border: 1px solid rgba(147,51,234,0.35);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.72rem;
+    color: var(--silver);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .path-tag .connector {
+    color: var(--aurora);
+    font-size: 0.65rem;
+  }
+
+  /* 쇼핑 버튼 */
+  .shop-section {
+    background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(107,33,168,0.15));
+    border: 1px solid rgba(251,191,36,0.25);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .shop-section p {
+    font-size: 0.85rem;
+    color: rgba(251,191,36,0.8);
+    margin-bottom: 14px;
+    line-height: 1.7;
+    font-family: 'Noto Serif KR', serif;
+  }
+
+  .btn-shop {
+    display: inline-block;
+    padding: 12px 32px;
+    background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(251,191,36,0.1));
+    border: 1px solid rgba(251,191,36,0.5);
+    border-radius: 30px;
+    color: var(--gold);
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    transition: all 0.3s ease;
+  }
+
+  .btn-shop:hover {
+    background: rgba(251,191,36,0.25);
+    box-shadow: 0 4px 20px rgba(251,191,36,0.2);
+    transform: translateY(-2px);
+  }
+
+  /* 재시도 버튼 */
+  .btn-reset {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid rgba(107,33,168,0.4);
+    border-radius: 10px;
+    color: var(--silver);
+    font-size: 0.82rem;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    margin-top: 16px;
+    transition: all 0.3s;
+  }
+
+  .btn-reset:hover {
+    border-color: var(--aurora);
+    color: var(--aurora);
+    background: rgba(107,33,168,0.1);
+  }
+
+  /* 에러 */
+  .error-msg {
+    display: none;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 10px;
+    padding: 14px;
+    color: #fca5a5;
+    font-size: 0.82rem;
+    text-align: center;
+    margin-top: 12px;
+  }
+  .error-msg.active { display: block; }
+
+  /* ===== 안내 배너 ===== */
+  .guide-banner {
+    background: rgba(147,51,234,0.08);
+    border: 1px solid rgba(147,51,234,0.2);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+    font-size: 0.78rem;
+    color: rgba(196,181,253,0.8);
+    line-height: 1.7;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .guide-banner:hover { border-color: rgba(147,51,234,0.4); }
+  .guide-banner .guide-title {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--silver); font-size: 0.8rem; margin-bottom: 4px;
+  }
+  .guide-banner .guide-arrow { transition: transform 0.3s; display: inline-block; }
+  .guide-banner.open .guide-arrow { transform: rotate(180deg); }
+  .guide-content { display: none; margin-top: 10px; }
+  .guide-banner.open .guide-content { display: block; }
+  .guide-row {
+    display: flex; gap: 8px; align-items: flex-start;
+    padding: 6px 0; border-bottom: 1px solid rgba(107,33,168,0.15);
+    font-size: 0.76rem;
+  }
+  .guide-row:last-child { border-bottom: none; }
+  .guide-row .gr-icon { font-size: 1rem; flex-shrink: 0; width: 22px; }
+  .guide-row .gr-label { color: var(--silver); font-weight: 400; min-width: 55px; flex-shrink: 0; }
+  .guide-row .gr-desc { color: rgba(196,181,253,0.7); }
+
+  /* ===== 커스텀 드롭다운 ===== */
+  .custom-select-wrap {
+    position: relative;
+  }
+
+  .custom-trigger {
+    width: 100%;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(107,33,168,0.3);
+    color: var(--star);
+    padding: 10px 36px 10px 12px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 42px;
+    position: relative;
+    user-select: none;
+  }
+
+  .custom-trigger::after {
+    content: '▾';
+    position: absolute;
+    right: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--aurora);
+    font-size: 0.75rem;
+    transition: transform 0.25s;
+  }
+
+  .custom-trigger.open::after { transform: translateY(-50%) rotate(180deg); }
+
+  .custom-trigger:hover, .custom-trigger.open {
+    border-color: var(--aurora);
+    background: rgba(107,33,168,0.12);
+  }
+
+  .custom-trigger .placeholder { color: rgba(196,181,253,0.4); }
+  .custom-trigger .selected-symbol { font-size: 1rem; }
+  .custom-trigger .selected-name { font-weight: 400; flex: 1; }
+  .custom-trigger .selected-hint {
+    font-size: 0.68rem;
+    color: rgba(196,181,253,0.55);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+  }
+
+  /* 드롭다운 패널 */
+  .custom-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0; right: 0;
+    background: #0f0530;
+    border: 1px solid rgba(147,51,234,0.45);
+    border-radius: 12px;
+    z-index: 100;
+    max-height: 320px;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(147,51,234,0.1);
+    animation: dropDown 0.18s ease;
+  }
+
+  @keyframes dropDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .custom-dropdown.open { display: block; }
+
+  .custom-dropdown::-webkit-scrollbar { width: 4px; }
+  .custom-dropdown::-webkit-scrollbar-track { background: transparent; }
+  .custom-dropdown::-webkit-scrollbar-thumb { background: rgba(147,51,234,0.4); border-radius: 2px; }
+
+  .dropdown-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(107,33,168,0.1);
+    transition: background 0.15s;
+    display: grid;
+    grid-template-columns: 22px 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 0 8px;
+    align-items: center;
+  }
+
+  .dropdown-item:last-child { border-bottom: none; }
+  .dropdown-item:hover { background: rgba(107,33,168,0.2); }
+  .dropdown-item.selected { background: rgba(147,51,234,0.18); }
+
+  .dropdown-item .di-symbol {
+    grid-row: 1 / 3; grid-column: 1;
+    font-size: 1.05rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .dropdown-item .di-name {
+    grid-row: 1; grid-column: 2;
+    font-size: 0.85rem;
+    color: var(--star);
+    font-weight: 400;
+  }
+
+  .dropdown-item .di-badge {
+    grid-row: 1; grid-column: 3;
+    font-size: 0.65rem;
+    background: rgba(107,33,168,0.3);
+    border: 1px solid rgba(147,51,234,0.25);
+    border-radius: 10px;
+    padding: 2px 7px;
+    color: var(--silver);
+    white-space: nowrap;
+  }
+
+  .dropdown-item .di-desc {
+    grid-row: 2; grid-column: 2 / 4;
+    font-size: 0.7rem;
+    color: rgba(196,181,253,0.55);
+    margin-top: 2px;
+    line-height: 1.4;
+  }
+
+  /* 선택 후 상세 카드 */
+  .sign-info-card {
+    display: none;
+    margin-top: 10px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 10px;
+    padding: 10px 12px;
+    border-left: 3px solid;
+    animation: fadeSlideIn 0.3s ease;
+  }
+  .sign-info-card.visible { display: block; }
+  .sign-card.sun .sign-info-card { border-left-color: var(--sun-color); }
+  .sign-card.moon .sign-info-card { border-left-color: var(--moon-color); }
+  .sign-card.rising .sign-info-card { border-left-color: var(--rising-color); }
+
+  .sign-info-card .sic-row {
+    display: flex; gap: 6px; align-items: baseline;
+    font-size: 0.72rem; margin-bottom: 4px;
+    line-height: 1.5;
+  }
+  .sign-info-card .sic-row:last-child { margin-bottom: 0; }
+  .sign-info-card .sic-label { color: rgba(196,181,253,0.5); min-width: 36px; flex-shrink: 0; }
+  .sign-info-card .sic-val { color: rgba(233,213,255,0.85); }
+  .sign-info-card .sic-keywords {
+    display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;
+  }
+  .sign-info-card .kw {
+    font-size: 0.65rem;
+    background: rgba(107,33,168,0.2);
+    border: 1px solid rgba(147,51,234,0.2);
+    border-radius: 8px;
+    padding: 2px 8px;
+    color: var(--silver);
+  }
+
+  /* 반응형 */
+  @media (max-width: 600px) {
+    .signs-grid { grid-template-columns: 1fr; gap: 14px; }
+    .input-section { padding: 20px; }
+    .wrapper { padding: 24px 16px; }
+    .custom-dropdown { max-height: 260px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<div class="wrapper">
+  <!-- 헤더 -->
+  <header>
+    <div class="subtitle">GraphRAG Powered</div>
+    <h1>별자리 운명의 그물</h1>
+    <p class="desc">태양궁 · 달궁 · 상승궁의 세 에너지가 교차하는 지점<br>지식 그래프가 추적하는 당신만의 운명 경로</p>
+    <div class="graphrag-badge">
+      <span>⬡</span>
+      <span>세 별자리 관계망 분석 · 근거 경로 시각화 · 심층 해석</span>
+    </div>
+  </header>
+
+  <!-- 입력 섹션 -->
+  <div class="input-section" id="inputSection">
+    <div class="section-label">나의 세 별자리 입력</div>
+
+    <!-- 초보자 안내 배너 -->
+    <div class="guide-banner" onclick="this.classList.toggle('open')">
+      <div class="guide-title">
+        <span>💡</span>
+        <span>세 별자리가 처음이신가요? 클릭해서 확인하세요</span>
+        <span class="guide-arrow">▾</span>
+      </div>
+      <div class="guide-content">
+        <div class="guide-row">
+          <span class="gr-icon">☀️</span>
+          <span class="gr-label">태양궁</span>
+          <span class="gr-desc">생년월일로 결정되는 <b style="color:var(--silver)">나의 본질·성격</b>. 가장 잘 알려진 별자리예요. 생일이 몇 월인지만 알면 바로 선택 가능합니다.</span>
+        </div>
+        <div class="guide-row">
+          <span class="gr-icon">🌙</span>
+          <span class="gr-label">달궁</span>
+          <span class="gr-desc">출생 당시 달의 위치. <b style="color:var(--silver)">감정·무의식·속마음</b>을 나타냅니다. 생년월일+출생시간으로 계산해요. 모르면 무료 달궁 계산기를 검색해보세요.</span>
+        </div>
+        <div class="guide-row">
+          <span class="gr-icon">↑</span>
+          <span class="gr-label">상승궁</span>
+          <span class="gr-desc">출생 시각의 동쪽 지평선 별자리. <b style="color:var(--silver)">타인에게 보이는 인상·외면</b>. 정확한 출생 시각이 필요하며, 몰라도 분석이 가능해요!</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="signs-grid">
+      <!-- 태양궁 -->
+      <div class="sign-card sun">
+        <div class="card-label">
+          <span class="card-dot"></span>
+          ☀️ 태양궁 <small style="opacity:0.6">나의 본질</small>
+        </div>
+        <div class="custom-select-wrap">
+          <div class="custom-trigger" id="sunTrigger" onclick="toggleDropdown('sun')">
+            <span class="placeholder">생일로 선택 ▸</span>
+          </div>
+          <div class="custom-dropdown" id="sunDropdown"></div>
+        </div>
+        <input type="hidden" id="sunSign" value="">
+        <div class="sign-info-card" id="sunInfo"></div>
+      </div>
+
+      <!-- 달궁 -->
+      <div class="sign-card moon">
+        <div class="card-label">
+          <span class="card-dot"></span>
+          🌙 달궁 <small style="opacity:0.6">내면 감정</small>
+        </div>
+        <div class="custom-select-wrap">
+          <div class="custom-trigger" id="moonTrigger" onclick="toggleDropdown('moon')">
+            <span class="placeholder">감정 스타일 선택 ▸</span>
+          </div>
+          <div class="custom-dropdown" id="moonDropdown"></div>
+        </div>
+        <input type="hidden" id="moonSign" value="">
+        <div class="sign-info-card" id="moonInfo"></div>
+      </div>
+
+      <!-- 상승궁 -->
+      <div class="sign-card rising">
+        <div class="card-label">
+          <span class="card-dot"></span>
+          ↑ 상승궁 <small style="opacity:0.6">타인이 본 나</small>
+        </div>
+        <div class="custom-select-wrap">
+          <div class="custom-trigger" id="risingTrigger" onclick="toggleDropdown('rising')">
+            <span class="placeholder">몰라도 괜찮아요 ✓</span>
+          </div>
+          <div class="custom-dropdown" id="risingDropdown"></div>
+        </div>
+        <input type="hidden" id="risingSign" value="">
+        <div class="sign-info-card" id="risingInfo"></div>
+      </div>
+    </div>
+
+    <!-- 고민 입력 -->
+    <div class="concern-box">
+      <label>📝 현재 가장 큰 고민이나 질문 (선택)</label>
+      <textarea id="concern" rows="3" placeholder="예: 이직을 고민 중입니다 / 새로운 인연이 생길까요 / 지금의 선택이 맞는 걸까요..."></textarea>
+    </div>
+
+    <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">
+      ✦ 운명의 그물 펼치기
+    </button>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <!-- 로딩 -->
+  <div class="loading-state" id="loadingState">
+    <div class="orbit-loader">
+      <div class="planet"></div>
+      <div class="planet"></div>
+      <div class="planet"></div>
+    </div>
+    <div class="loading-steps">
+      <div class="loading-step" id="step1"><span class="dot"></span> 세 별자리 노드 구성 중...</div>
+      <div class="loading-step" id="step2"><span class="dot"></span> 행성 지배 관계 그래프 탐색 중...</div>
+      <div class="loading-step" id="step3"><span class="dot"></span> 원소·성질 연결망 분석 중...</div>
+      <div class="loading-step" id="step4"><span class="dot"></span> 삼각 관계 에너지 해석 중...</div>
+      <div class="loading-step" id="step5"><span class="dot"></span> 운명 경로 시각화 준비 중...</div>
+    </div>
+  </div>
+
+  <!-- 결과 -->
+  <div class="result-section" id="resultSection">
+
+    <!-- 그래프 시각화 -->
+    <div class="graph-container">
+      <div class="graph-header">
+        <div class="pulse-dot"></div>
+        <h3>운명의 관계망 — 추론 경로 시각화</h3>
+      </div>
+      <div id="graph-canvas"></div>
+    </div>
+
+    <!-- 경로 태그 -->
+    <div class="path-tags" id="pathTags"></div>
+
+    <!-- 분석 카드들 -->
+    <div class="analysis-cards" id="analysisCards"></div>
+
+    <!-- 개운 아이템 -->
+    <div class="shop-section">
+      <p id="shopText">✨ 당신의 별자리 에너지에 맞는 개운 아이템을 찾아보세요</p>
+      <a href="#" class="btn-shop" id="shopBtn">🛒 나만의 개운(開運) 아이템 보러가기</a>
+    </div>
+
+    <button class="btn-reset" onclick="reset()">↺ 다시 분석하기</button>
+  </div>
+</div>
+
+<script>
+// ===== 별 배경 =====
+const canvas = document.getElementById('starfield');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+function initStars() {
+  stars = [];
+  for (let i = 0; i < 200; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.2,
+      a: Math.random(),
+      speed: Math.random() * 0.003 + 0.001
+    });
+  }
+}
+
+function drawStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.a += s.speed;
+    const alpha = (Math.sin(s.a) + 1) / 2 * 0.7 + 0.1;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(196,181,253,${alpha})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+
+window.addEventListener('resize', () => { resizeCanvas(); initStars(); });
+resizeCanvas(); initStars(); drawStars();
+
+
+// ===== 별자리 풀 데이터 (설명 포함) =====
+const SIGN_DATA = {
+  '양자리':    { element:'불',   quality:'활동', ruler:'화성',   symbol:'♈', color:'#ef4444',
+    date:'3/21 – 4/19', keywords:['열정','개척','충동','리더십'],
+    moon_desc:'즉각적·충동적 감정, 빠른 분노와 빠른 해소',
+    rising_desc:'활기차고 강렬한 첫인상, 눈빛이 날카롭다' },
+  '황소자리':  { element:'흙',   quality:'고정', ruler:'금성',   symbol:'♉', color:'#84cc16',
+    date:'4/20 – 5/20', keywords:['안정','감각','인내','현실'],
+    moon_desc:'안정·신뢰 추구, 감정 변화 느리고 깊음',
+    rising_desc:'믿음직하고 편안한 인상, 목소리가 부드럽다' },
+  '쌍둥이자리':{ element:'바람', quality:'변통', ruler:'수성',   symbol:'♊', color:'#facc15',
+    date:'5/21 – 6/21', keywords:['소통','지식','다양성','재치'],
+    moon_desc:'변덕스러운 감정, 말로 감정을 처리함',
+    rising_desc:'말 빠르고 표정 풍부, 눈이 호기심으로 반짝' },
+  '게자리':    { element:'물',   quality:'활동', ruler:'달',     symbol:'♋', color:'#93c5fd',
+    date:'6/22 – 7/22', keywords:['감정','가족','보호','직관'],
+    moon_desc:'섬세하고 풍부한 감정, 감수성이 매우 높음',
+    rising_desc:'부드럽고 따뜻한 인상, 배려심이 첫눈에 보임' },
+  '사자자리':  { element:'불',   quality:'고정', ruler:'태양',   symbol:'♌', color:'#fb923c',
+    date:'7/23 – 8/22', keywords:['창의','표현','자부심','관대'],
+    moon_desc:'드라마틱한 감정 표현, 인정받고 싶은 욕구',
+    rising_desc:'자신감 넘치는 카리스마, 존재감이 강하다' },
+  '처녀자리':  { element:'흙',   quality:'변통', ruler:'수성',   symbol:'♍', color:'#a3e635',
+    date:'8/23 – 9/22', keywords:['분석','봉사','완벽','건강'],
+    moon_desc:'걱정·분석적 감정, 세세한 것에 예민',
+    rising_desc:'단정하고 차분한 인상, 꼼꼼해 보인다' },
+  '천칭자리':  { element:'바람', quality:'활동', ruler:'금성',   symbol:'♎', color:'#f9a8d4',
+    date:'9/23 – 10/23', keywords:['균형','관계','미학','공정'],
+    moon_desc:'조화 추구, 결정 망설임, 관계에서 감정 충전',
+    rising_desc:'세련되고 우아한 첫인상, 균형 잡힌 외모' },
+  '전갈자리':  { element:'물',   quality:'고정', ruler:'명왕성', symbol:'♏', color:'#c084fc',
+    date:'10/24 – 11/21', keywords:['변환','심층','집중','비밀'],
+    moon_desc:'강렬하고 깊은 감정, 쉽게 드러내지 않음',
+    rising_desc:'신비롭고 강렬한 눈빛, 꿰뚫어보는 인상' },
+  '사수자리':  { element:'불',   quality:'변통', ruler:'목성',   symbol:'♐', color:'#fbbf24',
+    date:'11/22 – 12/21', keywords:['자유','모험','철학','낙관'],
+    moon_desc:'자유롭고 낙천적 감정, 구속받으면 답답해함',
+    rising_desc:'활달하고 유머 넘치는 인상, 웃음이 크다' },
+  '염소자리':  { element:'흙',   quality:'활동', ruler:'토성',   symbol:'♑', color:'#94a3b8',
+    date:'12/22 – 1/19', keywords:['야망','규율','책임','현실'],
+    moon_desc:'감정을 통제·절제, 내면은 깊은 외로움',
+    rising_desc:'진지하고 신뢰감 있는 인상, 나이보다 성숙해 보임' },
+  '물병자리':  { element:'바람', quality:'고정', ruler:'천왕성', symbol:'♒', color:'#67e8f9',
+    date:'1/20 – 2/18', keywords:['혁신','독립','인도주의','미래'],
+    moon_desc:'분리된 듯한 감정, 집단보다 이념에 반응',
+    rising_desc:'독특하고 개성 강한 인상, 튀는 스타일' },
+  '물고기자리':{ element:'물',   quality:'변통', ruler:'해왕성', symbol:'♓', color:'#a78bfa',
+    date:'2/19 – 3/20', keywords:['영성','공감','직관','예술'],
+    moon_desc:'경계 없는 공감 능력, 감정 흡수가 강함',
+    rising_desc:'몽환적이고 부드러운 인상, 눈이 깊고 표정이 유연' },
+};
+
+// ===== 커스텀 드롭다운 =====
+function buildDropdownItems(type) {
+  const signs = Object.keys(SIGN_DATA);
+  let html = '';
+  if (type === 'rising') {
+    html += `<div class="dropdown-item" data-value="" onclick="selectSign('rising','')">
+      <span class="di-symbol">✕</span>
+      <span class="di-name">선택 안 함</span>
+      <span class="di-badge">생략 가능</span>
+      <span class="di-desc">상승궁을 모르면 생략해도 분석됩니다</span>
+    </div>`;
+  }
+  signs.forEach(sign => {
+    const d = SIGN_DATA[sign];
+    let badge = '', desc = '';
+    if (type === 'sun') {
+      badge = d.date;
+      desc = d.element + '·' + d.quality + ' / ' + d.ruler + ' 지배 / ' + d.keywords.slice(0,2).join('·');
+    } else if (type === 'moon') {
+      badge = d.element + ' 감정';
+      desc = d.moon_desc;
+    } else {
+      badge = d.element + '·외면';
+      desc = d.rising_desc;
+    }
+    html += `<div class="dropdown-item" data-value="${sign}" onclick="selectSign('${type}','${sign}')">
+      <span class="di-symbol">${d.symbol}</span>
+      <span class="di-name">${sign}</span>
+      <span class="di-badge">${badge}</span>
+      <span class="di-desc">${desc}</span>
+    </div>`;
+  });
+  return html;
+}
+
+function initDropdowns() {
+  document.getElementById('sunDropdown').innerHTML    = buildDropdownItems('sun');
+  document.getElementById('moonDropdown').innerHTML   = buildDropdownItems('moon');
+  document.getElementById('risingDropdown').innerHTML = buildDropdownItems('rising');
+}
+
+function toggleDropdown(type) {
+  const dropdown = document.getElementById(type + 'Dropdown');
+  const trigger  = document.getElementById(type + 'Trigger');
+  const isOpen   = dropdown.classList.contains('open');
+  ['sun','moon','rising'].forEach(t => {
+    document.getElementById(t + 'Dropdown').classList.remove('open');
+    document.getElementById(t + 'Trigger').classList.remove('open');
+  });
+  if (!isOpen) {
+    dropdown.classList.add('open');
+    trigger.classList.add('open');
+  }
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.custom-select-wrap')) {
+    ['sun','moon','rising'].forEach(t => {
+      document.getElementById(t + 'Dropdown').classList.remove('open');
+      document.getElementById(t + 'Trigger').classList.remove('open');
+    });
+  }
+});
+
+function selectSign(type, value) {
+  const trigger  = document.getElementById(type + 'Trigger');
+  const hidden   = document.getElementById(type + 'Sign');
+  const infoCard = document.getElementById(type + 'Info');
+  hidden.value = value;
+  document.getElementById(type + 'Dropdown').classList.remove('open');
+  trigger.classList.remove('open');
+  document.querySelectorAll('#' + type + 'Dropdown .dropdown-item').forEach(el => {
+    el.classList.toggle('selected', el.dataset.value === value);
+  });
+  if (!value) {
+    trigger.innerHTML = `<span class="placeholder">몰라도 괜찮아요 ✓</span>`;
+    infoCard.classList.remove('visible');
+    return;
+  }
+  const d = SIGN_DATA[value];
+  let hint = '';
+  if (type === 'sun')       hint = d.date;
+  else if (type === 'moon') hint = d.moon_desc.split(',')[0].split('·')[0];
+  else                      hint = d.rising_desc.split(',')[0].split('·')[0];
+  trigger.innerHTML = `<span class="selected-symbol">${d.symbol}</span><span class="selected-name">${value}</span><span class="selected-hint">${hint}</span>`;
+  let infoHTML = '';
+  if (type === 'sun') {
+    infoHTML = `<div class="sic-row"><span class="sic-label">생일</span><span class="sic-val">${d.date}</span></div>
+      <div class="sic-row"><span class="sic-label">원소</span><span class="sic-val">${d.element} · ${d.quality}궁</span></div>
+      <div class="sic-row"><span class="sic-label">지배</span><span class="sic-val">${d.ruler} 지배</span></div>
+      <div class="sic-keywords">${d.keywords.map(k => '<span class="kw">'+k+'</span>').join('')}</div>`;
+  } else if (type === 'moon') {
+    infoHTML = `<div class="sic-row"><span class="sic-label">감정</span><span class="sic-val">${d.moon_desc}</span></div>
+      <div class="sic-row"><span class="sic-label">원소</span><span class="sic-val">${d.element} · ${d.ruler} 지배</span></div>
+      <div class="sic-keywords">${d.keywords.map(k => '<span class="kw">'+k+'</span>').join('')}</div>`;
+  } else {
+    infoHTML = `<div class="sic-row"><span class="sic-label">인상</span><span class="sic-val">${d.rising_desc}</span></div>
+      <div class="sic-row"><span class="sic-label">원소</span><span class="sic-val">${d.element} · ${d.ruler} 지배</span></div>
+      <div class="sic-keywords">${d.keywords.map(k => '<span class="kw">'+k+'</span>').join('')}</div>`;
+  }
+  infoCard.innerHTML = infoHTML;
+  infoCard.classList.add('visible');
+}
+
+initDropdowns();
+
+function getAspect(s1, s2) {
+  const signs = Object.keys(SIGN_DATA);
+  const i1 = signs.indexOf(s1), i2 = signs.indexOf(s2);
+  const diff = Math.abs(i1 - i2);
+  const angle = Math.min(diff, 12 - diff) * 30;
+  if (angle === 0) return { name: '합(Conjunction)', harmony: 1.0, desc: '에너지 증폭' };
+  if (angle === 60) return { name: '육분(Sextile)', harmony: 0.8, desc: '조화로운 협력' };
+  if (angle === 90) return { name: '직각(Square)', harmony: 0.3, desc: '긴장과 성장' };
+  if (angle === 120) return { name: '삼분(Trine)', harmony: 0.95, desc: '천부적 흐름' };
+  if (angle === 180) return { name: '대립(Opposition)', harmony: 0.5, desc: '균형과 대조' };
+  return { name: '마이너 각도', harmony: 0.6, desc: '미묘한 연결' };
+}
+
+// ===== 그래프 그리기 =====
+function drawGraph(sun, moon, rising) {
+  const container = document.getElementById('graph-canvas');
+  const sunData = SIGN_DATA[sun];
+  const moonData = SIGN_DATA[moon];
+  const risingData = rising ? SIGN_DATA[rising] : null;
+
+  const nodes = [
+    { id: 1, label: `☀️ 태양궁\n${sun}`, color: { background: 'rgba(251,191,36,0.15)', border: '#fbbf24', highlight: { background: 'rgba(251,191,36,0.3)', border: '#fbbf24' }}, font: { color: '#fde68a', size: 13, face: 'Noto Sans KR' }, shape: 'ellipse', size: 38 },
+    { id: 2, label: `🌙 달궁\n${moon}`,  color: { background: 'rgba(147,197,253,0.15)', border: '#93c5fd', highlight: { background: 'rgba(147,197,253,0.3)', border: '#93c5fd' }}, font: { color: '#bfdbfe', size: 13, face: 'Noto Sans KR' }, shape: 'ellipse', size: 34 },
+  ];
+
+  const edges = [];
+
+  const sunMoon = getAspect(sun, moon);
+  edges.push({ from: 1, to: 2, label: sunMoon.name, color: { color: sunMoon.harmony > 0.7 ? '#6ee7b7' : sunMoon.harmony > 0.4 ? '#fbbf24' : '#f87171', opacity: 0.8 }, font: { color: 'rgba(196,181,253,0.8)', size: 10, face: 'Noto Sans KR' }, dashes: sunMoon.harmony < 0.5 });
+
+  if (risingData) {
+    nodes.push({ id: 3, label: `↑ 상승궁\n${rising}`, color: { background: 'rgba(110,231,183,0.15)', border: '#6ee7b7', highlight: { background: 'rgba(110,231,183,0.3)', border: '#6ee7b7' }}, font: { color: '#a7f3d0', size: 13, face: 'Noto Sans KR' }, shape: 'ellipse', size: 30 });
+    const sunRising = getAspect(sun, rising);
+    const moonRising = getAspect(moon, rising);
+    edges.push({ from: 1, to: 3, label: sunRising.name, color: { color: sunRising.harmony > 0.7 ? '#6ee7b7' : sunRising.harmony > 0.4 ? '#fbbf24' : '#f87171', opacity: 0.8 }, font: { color: 'rgba(196,181,253,0.8)', size: 10, face: 'Noto Sans KR' }, dashes: sunRising.harmony < 0.5 });
+    edges.push({ from: 2, to: 3, label: moonRising.name, color: { color: moonRising.harmony > 0.7 ? '#6ee7b7' : moonRising.harmony > 0.4 ? '#fbbf24' : '#f87171', opacity: 0.8 }, font: { color: 'rgba(196,181,253,0.8)', size: 10, face: 'Noto Sans KR' }, dashes: moonRising.harmony < 0.5 });
+  }
+
+  // 지배 행성 노드 추가
+  const rulers = [...new Set([sunData.ruler, moonData.ruler, risingData?.ruler].filter(Boolean))];
+  rulers.forEach((ruler, i) => {
+    nodes.push({ id: 10+i, label: `⬡ ${ruler}`, color: { background: 'rgba(107,33,168,0.2)', border: '#9333ea', highlight: { background: 'rgba(107,33,168,0.4)', border: '#9333ea' }}, font: { color: '#d8b4fe', size: 11, face: 'Noto Sans KR' }, shape: 'diamond', size: 20 });
+    if (SIGN_DATA[sun]?.ruler === ruler) edges.push({ from: 1, to: 10+i, color: { color: '#9333ea', opacity: 0.4 }, dashes: [2,4] });
+    if (SIGN_DATA[moon]?.ruler === ruler) edges.push({ from: 2, to: 10+i, color: { color: '#9333ea', opacity: 0.4 }, dashes: [2,4] });
+    if (risingData?.ruler === ruler) edges.push({ from: 3, to: 10+i, color: { color: '#9333ea', opacity: 0.4 }, dashes: [2,4] });
+  });
+
+  const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
+  const options = {
+    physics: { stabilization: { iterations: 100 }, barnesHut: { gravitationalConstant: -3000, springLength: 120 } },
+    interaction: { hover: true, tooltipDelay: 200 },
+    layout: { improvedLayout: true },
+    edges: { smooth: { type: 'curvedCW', roundness: 0.2 }, arrows: { to: false }, width: 1.5 },
+    background: { color: 'transparent' },
+  };
+
+  container.innerHTML = '';
+  new vis.Network(container, data, options);
+}
+
+// ===== 경로 태그 =====
+function buildPathTags(sun, moon, rising) {
+  const container = document.getElementById('pathTags');
+  const sunD = SIGN_DATA[sun], moonD = SIGN_DATA[moon];
+
+  const tags = [
+    `☀️ ${sun} (${sunD.element}·${sunD.quality}·${sunD.ruler} 지배)`,
+    `→`,
+    `🌙 ${moon} (${moonD.element}·${moonD.quality}·${moonD.ruler} 지배)`,
+  ];
+
+  if (rising && SIGN_DATA[rising]) {
+    const risingD = SIGN_DATA[rising];
+    tags.push(`→`);
+    tags.push(`↑ ${rising} (${risingD.element}·${risingD.quality}·${risingD.ruler} 지배)`);
+  }
+
+  container.innerHTML = tags.map((t, i) =>
+    t === '→'
+      ? `<span class="path-tag"><span class="connector">—→—</span></span>`
+      : `<span class="path-tag">${t}</span>`
+  ).join('');
+}
+
+// ===== 메인 분석 함수 =====
+async function analyze() {
+  const sun = document.getElementById('sunSign').value;
+  const moon = document.getElementById('moonSign').value;
+  const rising = document.getElementById('risingSign').value;
+  const concern = document.getElementById('concern').value.trim();
+
+  if (!sun || !moon) {
+    showError('태양궁과 달궁을 선택해주세요 ✦');
+    return;
+  }
+
+  document.getElementById('inputSection').style.display = 'none';
+  document.getElementById('resultSection').classList.remove('active');
+  showLoading();
+
+  try {
+    const response = await fetch('/api/fortune', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sun, moon, rising, concern })
+    });
+
+    if (!response.ok) throw new Error('API 오류');
+    const data = await response.json();
+
+    hideLoading();
+    showResult(data, sun, moon, rising);
+
+  } catch (err) {
+    hideLoading();
+    document.getElementById('inputSection').style.display = 'block';
+    showError('분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+  }
+}
+
+function showLoading() {
+  const el = document.getElementById('loadingState');
+  el.classList.add('active');
+  const steps = ['step1','step2','step3','step4','step5'];
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i < steps.length) {
+      document.getElementById(steps[i]).classList.add('active');
+      i++;
+    } else {
+      clearInterval(interval);
+    }
+  }, 700);
+}
+
+function hideLoading() {
+  document.getElementById('loadingState').classList.remove('active');
+  ['step1','step2','step3','step4','step5'].forEach(s => document.getElementById(s).classList.remove('active'));
+}
+
+function showResult(data, sun, moon, rising) {
+  document.getElementById('resultSection').classList.add('active');
+  drawGraph(sun, moon, rising);
+  buildPathTags(sun, moon, rising);
+
+  const cards = document.getElementById('analysisCards');
+  cards.innerHTML = `
+    <div class="analysis-card">
+      <div class="card-title path"><span class="icon">⬡</span> 관계 경로 분석 — GraphRAG 추론 근거</div>
+      <div class="card-body">${data.path_analysis}</div>
+    </div>
+    <div class="analysis-card">
+      <div class="card-title deep"><span class="icon">✦</span> 심층 운세 해석</div>
+      <div class="card-body">${data.deep_reading}</div>
+    </div>
+    <div class="analysis-card">
+      <div class="card-title action"><span class="icon">◈</span> 지금 당장 할 수 있는 개운 행동</div>
+      <div class="card-body">${data.action_guide}</div>
+    </div>
+  `;
+
+  if (data.shop_message) {
+    document.getElementById('shopText').textContent = data.shop_message;
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function reset() {
+  document.getElementById('resultSection').classList.remove('active');
+  document.getElementById('inputSection').style.display = 'block';
+  document.getElementById('errorMsg').classList.remove('active');
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

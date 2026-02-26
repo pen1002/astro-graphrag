@@ -161,6 +161,9 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     margin-bottom: 24px;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
   }
 
   .sign-card {
@@ -623,6 +626,10 @@
   /* ===== 커스텀 드롭다운 ===== */
   .custom-select-wrap {
     position: relative;
+    z-index: 1;
+  }
+  .custom-select-wrap:has(.custom-dropdown.open) {
+    z-index: 9999;
   }
 
   .custom-trigger {
@@ -677,16 +684,18 @@
   /* 드롭다운 패널 */
   .custom-dropdown {
     display: none;
-    position: fixed;       /* absolute → fixed: 다른 요소에 가려지지 않음 */
-    background: #110535;   /* 더 진한 불투명 배경 */
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #110535;
     border: 2px solid rgba(147,51,234,0.7);
     border-radius: 14px;
-    z-index: 9999;         /* 최상위 */
+    z-index: 9999;
     max-height: 60vh;
     overflow-y: auto;
-    box-shadow: 0 12px 48px rgba(0,0,0,0.95), 0 0 0 1px rgba(147,51,234,0.3);
+    box-shadow: 0 16px 56px rgba(0,0,0,0.98), 0 0 0 2px rgba(147,51,234,0.25);
     animation: dropDown 0.18s ease;
-    backdrop-filter: none; /* 블러 제거 - 배경 완전 불투명 */
   }
 
   @keyframes dropDown {
@@ -1195,54 +1204,10 @@ function toggleDropdown(type) {
   });
 
   if (!isOpen) {
-    // fixed 위치 계산: trigger 기준으로 dropdown 위치 지정
-    const rect   = trigger.getBoundingClientRect();
-    const margin = 16;
-    // 카드 컨테이너 너비 기준으로 드롭다운 너비 계산
-    const card   = trigger.closest('.sign-card') || trigger.parentElement;
-    const cardRect = card ? card.getBoundingClientRect() : rect;
-
-    // 화면 너비에서 여백 뺀 최대 너비
-    const maxW = window.innerWidth - margin * 2;
-    // 카드 너비 또는 320px 중 큰 값, 단 화면보다 크지 않게
-    const dropW = Math.min(Math.max(cardRect.width, 320), maxW);
-    // 왼쪽 정렬: 카드 왼쪽 기준, 화면 밖으로 나가지 않게
-    let leftPos = cardRect.left;
-    if (leftPos + dropW > window.innerWidth - margin) {
-      leftPos = window.innerWidth - margin - dropW;
-    }
-    leftPos = Math.max(margin, leftPos);
-
-    dropdown.style.left  = leftPos + 'px';
-    dropdown.style.width = dropW + 'px';
-    dropdown.style.top   = (rect.bottom + 6) + 'px';
-
-    // 화면 아래로 넘치면 위로 펼치기
-    const spaceBelow = window.innerHeight - rect.bottom - 10;
-    const dropH      = Math.min(window.innerHeight * 0.6, 420);
-    if (spaceBelow < 200 && rect.top > dropH) {
-      dropdown.style.top = (rect.top - dropH - 6) + 'px';
-    }
-
     dropdown.classList.add('open');
     trigger.classList.add('open');
   }
 }
-
-// 스크롤/리사이즈 시 열린 드롭다운 위치 재계산
-window.addEventListener('scroll', function() {
-  ['sun','moon','rising'].forEach(t => {
-    const dd = document.getElementById(t + 'Dropdown');
-    if (dd && dd.classList.contains('open')) {
-      const tr = document.getElementById(t + 'Trigger');
-      if (tr) {
-        const rect = tr.getBoundingClientRect();
-        dd.style.top  = (rect.bottom + 6) + 'px';
-        dd.style.left = rect.left + 'px';
-      }
-    }
-  });
-}, true);
 
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.custom-select-wrap')) {

@@ -1,8 +1,5 @@
 {
-  "routes": [
-    {
-      "src": "/api/fortune",
-      "dest": "/api/fortune.js"
-    }
-  ]
+  "name": "astro-graphrag",
+  "version": "1.0.0",
+  "private": true
 }

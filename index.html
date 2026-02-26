@@ -677,17 +677,16 @@
   /* 드롭다운 패널 */
   .custom-dropdown {
     display: none;
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0; right: 0;
-    background: #0f0530;
-    border: 1px solid rgba(147,51,234,0.45);
-    border-radius: 12px;
-    z-index: 100;
-    max-height: 320px;
+    position: fixed;       /* absolute → fixed: 다른 요소에 가려지지 않음 */
+    background: #110535;   /* 더 진한 불투명 배경 */
+    border: 2px solid rgba(147,51,234,0.7);
+    border-radius: 14px;
+    z-index: 9999;         /* 최상위 */
+    max-height: 60vh;
     overflow-y: auto;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(147,51,234,0.1);
+    box-shadow: 0 12px 48px rgba(0,0,0,0.95), 0 0 0 1px rgba(147,51,234,0.3);
     animation: dropDown 0.18s ease;
+    backdrop-filter: none; /* 블러 제거 - 배경 완전 불투명 */
   }
 
   @keyframes dropDown {
@@ -702,20 +701,20 @@
   .custom-dropdown::-webkit-scrollbar-thumb { background: rgba(147,51,234,0.4); border-radius: 2px; }
 
   .dropdown-item {
-    padding: 10px 14px;
+    padding: 14px 16px;
     cursor: pointer;
-    border-bottom: 1px solid rgba(107,33,168,0.1);
+    border-bottom: 1px solid rgba(147,51,234,0.2);
     transition: background 0.15s;
     display: grid;
-    grid-template-columns: 22px 1fr auto;
+    grid-template-columns: 28px 1fr auto;
     grid-template-rows: auto auto;
-    gap: 0 8px;
+    gap: 0 10px;
     align-items: center;
   }
 
   .dropdown-item:last-child { border-bottom: none; }
-  .dropdown-item:hover { background: rgba(107,33,168,0.2); }
-  .dropdown-item.selected { background: rgba(147,51,234,0.18); }
+  .dropdown-item:hover { background: rgba(107,33,168,0.45); }   /* 더 진한 호버 */
+  .dropdown-item.selected { background: rgba(147,51,234,0.4); }
 
   .dropdown-item .di-symbol {
     grid-row: 1 / 3; grid-column: 1;
@@ -725,9 +724,9 @@
 
   .dropdown-item .di-name {
     grid-row: 1; grid-column: 2;
-    font-size: 1rem;
-    color: var(--star);
-    font-weight: 400;
+    font-size: 1.2rem;
+    color: #FFFFFF;         /* 순백색으로 최대 대비 */
+    font-weight: 700;
   }
 
   .dropdown-item .di-badge {
@@ -743,10 +742,10 @@
 
   .dropdown-item .di-desc {
     grid-row: 2; grid-column: 2 / 4;
-    font-size: 0.85rem;
-    color: rgba(196,181,253,0.55);
-    margin-top: 2px;
-    line-height: 1.4;
+    font-size: 1rem;
+    color: rgba(220,210,255,0.9);  /* 밝게 */
+    margin-top: 4px;
+    line-height: 1.5;
   }
 
   /* 선택 후 상세 카드 */
@@ -859,6 +858,24 @@
 
     /* 그래프 헤더 */
     .graph-header { padding: 14px 18px; }
+
+    /* 드롭다운 모바일 글자 크기 극대화 */
+    .dropdown-item .di-name  { font-size: 1.35rem !important; }
+    .dropdown-item .di-desc  { font-size: 1.05rem !important; line-height: 1.6; }
+    .dropdown-item .di-badge { font-size: 0.9rem !important; padding: 4px 12px; }
+    .dropdown-item .di-symbol { font-size: 1.5rem !important; }
+    .dropdown-item { padding: 18px 16px !important; }
+
+    /* 트리거 버튼 더 크게 */
+    .custom-trigger { min-height: 58px !important; font-size: 1.2rem !important; }
+
+    /* 선택 후 정보 카드 글자 */
+    .sic-val { font-size: 1.05rem !important; }
+    .sic-label { font-size: 0.95rem !important; }
+    .kw { font-size: 0.95rem !important; padding: 5px 12px !important; }
+
+    /* 카드 라벨 */
+    .card-label { font-size: 1.1rem !important; }
 
     /* path-tag — 이전 규칙 덮어쓰기 */
     .path-tag { font-size: 0.8rem; }
@@ -1168,15 +1185,47 @@ function toggleDropdown(type) {
   const dropdown = document.getElementById(type + 'Dropdown');
   const trigger  = document.getElementById(type + 'Trigger');
   const isOpen   = dropdown.classList.contains('open');
+
+  // 모두 닫기
   ['sun','moon','rising'].forEach(t => {
     document.getElementById(t + 'Dropdown').classList.remove('open');
     document.getElementById(t + 'Trigger').classList.remove('open');
   });
+
   if (!isOpen) {
+    // fixed 위치 계산: trigger 기준으로 dropdown 위치 지정
+    const rect = trigger.getBoundingClientRect();
+    const dropW = Math.min(rect.width, window.innerWidth - 32);
+    dropdown.style.left   = rect.left + 'px';
+    dropdown.style.width  = dropW + 'px';
+    dropdown.style.top    = (rect.bottom + 6) + 'px';
+
+    // 화면 아래로 넘치면 위로 펼치기
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const dropH      = Math.min(window.innerHeight * 0.6, 400);
+    if (spaceBelow < dropH && rect.top > dropH) {
+      dropdown.style.top    = (rect.top - dropH - 6) + 'px';
+    }
+
     dropdown.classList.add('open');
     trigger.classList.add('open');
   }
 }
+
+// 스크롤/리사이즈 시 열린 드롭다운 위치 재계산
+window.addEventListener('scroll', function() {
+  ['sun','moon','rising'].forEach(t => {
+    const dd = document.getElementById(t + 'Dropdown');
+    if (dd && dd.classList.contains('open')) {
+      const tr = document.getElementById(t + 'Trigger');
+      if (tr) {
+        const rect = tr.getBoundingClientRect();
+        dd.style.top  = (rect.bottom + 6) + 'px';
+        dd.style.left = rect.left + 'px';
+      }
+    }
+  });
+}, true);
 
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.custom-select-wrap')) {
@@ -1392,21 +1441,17 @@ function showResult(data, sun, moon, rising) {
   cards.innerHTML = `
     <div class="analysis-card">
       <div class="card-title path"><span class="icon">⬡</span> 관계 경로 분석 — GraphRAG 추론 근거</div>
-      <div class="card-body">${data.path_analysis}</div>
+      <div class="card-body">${(data.path_analysis || "").replace(/\n/g, "<br>")}</div>
     </div>
     <div class="analysis-card">
       <div class="card-title deep"><span class="icon">✦</span> 심층 운세 해석</div>
-      <div class="card-body">${data.deep_reading}</div>
+      <div class="card-body">${(data.deep_reading || "").replace(/\n/g, "<br>")}</div>
     </div>
     <div class="analysis-card">
       <div class="card-title action"><span class="icon">◈</span> 지금 당장 할 수 있는 개운 행동</div>
-      <div class="card-body">${data.action_guide}</div>
+      <div class="card-body action-guide-body">${(data.action_guide || "").replace(/\n/g, "<br>")}</div>
     </div>
   `;
-
-  if (data.shop_message) {
-    document.getElementById('shopText').textContent = data.shop_message;
-  }
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }

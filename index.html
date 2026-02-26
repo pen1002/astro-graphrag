@@ -5,8 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🌌 별자리 운명의 그물 — GraphRAG 심층 운세</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700&family=Cinzel+Decorative:wght@400;700&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.9/vis-network.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.9/dist/vis-network.min.css">
+<script>
+// vis-network 로드 (CDN 폴백 포함)
+(function() {
+  var s = document.createElement('script');
+  s.src = 'https://unpkg.com/vis-network@9.1.9/dist/vis-network.min.js';
+  s.onerror = function() {
+    var s2 = document.createElement('script');
+    s2.src = 'https://cdn.jsdelivr.net/npm/vis-network@9.1.9/dist/vis-network.min.js';
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s);
+})();
+</script>
+<!-- vis-network 스타일 인라인 처리 -->
 <style>
   :root {
     --void: #03010a;
@@ -1100,6 +1112,10 @@ function getAspect(s1, s2) {
 // ===== 그래프 그리기 =====
 function drawGraph(sun, moon, rising) {
   const container = document.getElementById('graph-canvas');
+  if (typeof vis === 'undefined') {
+    container.innerHTML = '<div style="height:100%;display:flex;align-items:center;justify-content:center;color:rgba(196,181,253,0.5);font-size:0.85rem;">☁️ 그래프 라이브러리 로딩 중... (결과는 아래에서 확인하세요)</div>';
+    return;
+  }
   const sunData = SIGN_DATA[sun];
   const moonData = SIGN_DATA[moon];
   const risingData = rising ? SIGN_DATA[rising] : null;

@@ -1,5 +1,23 @@
 {
-  "name": "astro-graphrag",
-  "version": "1.0.0",
-  "private": true
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/fortune.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/fortune",
+      "dest": "/api/fortune.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }

@@ -3,6 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google Analytics GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+
+  // 커스텀 이벤트 트래킹 함수
+  function trackEvent(action, category, label) {
+    if (typeof gtag !== 'undefined') {
+      gtag('event', action, { event_category: category, event_label: label });
+    }
+  }
+</script>
 <title>🌌 별자리 운명의 그물 — GraphRAG 심층 운세</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700&family=Cinzel+Decorative:wght@400;700&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
 <script>
@@ -71,8 +86,8 @@
 
   header .subtitle {
     font-family: 'Cinzel Decorative', serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.4em;
+    font-size: 0.85rem;
+    letter-spacing: 0.3em;
     color: var(--aurora);
     text-transform: uppercase;
     margin-bottom: 16px;
@@ -81,7 +96,7 @@
 
   header h1 {
     font-family: 'Cinzel Decorative', serif;
-    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
     font-weight: 700;
     background: linear-gradient(135deg, var(--gold) 0%, var(--silver) 50%, var(--aurora) 100%);
     -webkit-background-clip: text;
@@ -91,8 +106,8 @@
   }
 
   header p.desc {
-    font-size: 0.85rem;
-    color: rgba(196,181,253,0.7);
+    font-size: 1rem;
+    color: rgba(196,181,253,0.85);
     font-weight: 300;
     line-height: 1.7;
   }
@@ -106,7 +121,7 @@
     border: 1px solid rgba(147,51,234,0.4);
     border-radius: 20px;
     padding: 6px 16px;
-    font-size: 0.72rem;
+    font-size: 0.82rem;
     color: var(--silver);
     margin-top: 16px;
     letter-spacing: 0.05em;
@@ -162,8 +177,8 @@
   }
 
   .sign-card .card-label {
-    font-size: 0.7rem;
-    margin-bottom: 8px;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -218,9 +233,9 @@
 
   .concern-box label {
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.95rem;
     color: var(--silver);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     letter-spacing: 0.1em;
   }
 
@@ -231,7 +246,7 @@
     color: var(--star);
     padding: 12px 16px;
     border-radius: 10px;
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-family: 'Noto Sans KR', sans-serif;
     resize: none;
     outline: none;
@@ -255,7 +270,7 @@
     border: none;
     border-radius: 12px;
     color: white;
-    font-size: 1rem;
+    font-size: 1.15rem;
     font-family: 'Noto Serif KR', serif;
     font-weight: 700;
     cursor: pointer;
@@ -328,7 +343,7 @@
   }
 
   .loading-steps {
-    font-size: 0.8rem;
+    font-size: 0.95rem;
     color: var(--silver);
     line-height: 2;
   }
@@ -370,7 +385,7 @@
   }
 
   .graph-header h3 {
-    font-size: 0.78rem;
+    font-size: 0.95rem;
     letter-spacing: 0.2em;
     color: var(--silver);
     text-transform: uppercase;
@@ -438,8 +453,8 @@
 
   .card-body {
     font-family: 'Noto Serif KR', serif;
-    font-size: 0.92rem;
-    line-height: 1.9;
+    font-size: 1.05rem;
+    line-height: 2.0;
     color: rgba(233,213,255,0.9);
     font-weight: 300;
   }
@@ -469,39 +484,72 @@
     font-size: 0.65rem;
   }
 
-  /* 쇼핑 버튼 */
-  .shop-section {
-    background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(107,33,168,0.15));
-    border: 1px solid rgba(251,191,36,0.25);
+  /* 공유 버튼 섹션 */
+  .share-section {
+    background: linear-gradient(135deg, rgba(254,215,170,0.08), rgba(107,33,168,0.12));
+    border: 1px solid rgba(254,215,170,0.2);
     border-radius: 16px;
     padding: 24px;
     text-align: center;
+    margin-bottom: 16px;
   }
 
-  .shop-section p {
-    font-size: 0.85rem;
-    color: rgba(251,191,36,0.8);
-    margin-bottom: 14px;
+  .share-title {
+    font-size: 1rem;
+    color: rgba(233,213,255,0.85);
+    margin-bottom: 16px;
     line-height: 1.7;
     font-family: 'Noto Serif KR', serif;
   }
 
-  .btn-shop {
-    display: inline-block;
-    padding: 12px 32px;
-    background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(251,191,36,0.1));
-    border: 1px solid rgba(251,191,36,0.5);
-    border-radius: 30px;
-    color: var(--gold);
-    text-decoration: none;
-    font-size: 0.85rem;
-    letter-spacing: 0.1em;
-    transition: all 0.3s ease;
+  .share-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
   }
 
-  .btn-shop:hover {
-    background: rgba(251,191,36,0.25);
-    box-shadow: 0 4px 20px rgba(251,191,36,0.2);
+  .btn-kakao {
+    display: inline-flex;
+    align-items: center;
+    padding: 13px 28px;
+    background: #FEE500;
+    border: none;
+    border-radius: 12px;
+    color: #3C1E1E;
+    font-size: 1rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(254,229,0,0.25);
+  }
+
+  .btn-kakao:hover {
+    background: #FFD700;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(254,229,0,0.4);
+  }
+
+  .btn-kakao:active { transform: translateY(0); }
+
+  .btn-copy-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 13px 28px;
+    background: rgba(147,51,234,0.2);
+    border: 1px solid rgba(147,51,234,0.4);
+    border-radius: 12px;
+    color: var(--silver);
+    font-size: 1rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .btn-copy-link:hover {
+    background: rgba(147,51,234,0.35);
+    border-color: var(--aurora);
     transform: translateY(-2px);
   }
 
@@ -513,7 +561,7 @@
     border: 1px solid rgba(107,33,168,0.4);
     border-radius: 10px;
     color: var(--silver);
-    font-size: 0.82rem;
+    font-size: 0.95rem;
     cursor: pointer;
     letter-spacing: 0.1em;
     margin-top: 16px;
@@ -534,7 +582,7 @@
     border-radius: 10px;
     padding: 14px;
     color: #fca5a5;
-    font-size: 0.82rem;
+    font-size: 0.95rem;
     text-align: center;
     margin-top: 12px;
   }
@@ -547,7 +595,7 @@
     border-radius: 12px;
     padding: 14px 18px;
     margin-bottom: 22px;
-    font-size: 0.78rem;
+    font-size: 0.95rem;
     color: rgba(196,181,253,0.8);
     line-height: 1.7;
     cursor: pointer;
@@ -556,7 +604,7 @@
   .guide-banner:hover { border-color: rgba(147,51,234,0.4); }
   .guide-banner .guide-title {
     display: flex; align-items: center; gap: 8px;
-    color: var(--silver); font-size: 0.8rem; margin-bottom: 4px;
+    color: var(--silver); font-size: 0.95rem; margin-bottom: 4px;
   }
   .guide-banner .guide-arrow { transition: transform 0.3s; display: inline-block; }
   .guide-banner.open .guide-arrow { transform: rotate(180deg); }
@@ -565,7 +613,7 @@
   .guide-row {
     display: flex; gap: 8px; align-items: flex-start;
     padding: 6px 0; border-bottom: 1px solid rgba(107,33,168,0.15);
-    font-size: 0.76rem;
+    font-size: 0.9rem;
   }
   .guide-row:last-child { border-bottom: none; }
   .guide-row .gr-icon { font-size: 1rem; flex-shrink: 0; width: 22px; }
@@ -584,7 +632,7 @@
     color: var(--star);
     padding: 10px 36px 10px 12px;
     border-radius: 10px;
-    font-size: 0.82rem;
+    font-size: 1rem;
     font-family: 'Noto Sans KR', sans-serif;
     cursor: pointer;
     transition: all 0.25s;
@@ -677,14 +725,14 @@
 
   .dropdown-item .di-name {
     grid-row: 1; grid-column: 2;
-    font-size: 0.85rem;
+    font-size: 1rem;
     color: var(--star);
     font-weight: 400;
   }
 
   .dropdown-item .di-badge {
     grid-row: 1; grid-column: 3;
-    font-size: 0.65rem;
+    font-size: 0.95rem;
     background: rgba(107,33,168,0.3);
     border: 1px solid rgba(147,51,234,0.25);
     border-radius: 10px;
@@ -695,7 +743,7 @@
 
   .dropdown-item .di-desc {
     grid-row: 2; grid-column: 2 / 4;
-    font-size: 0.7rem;
+    font-size: 0.85rem;
     color: rgba(196,181,253,0.55);
     margin-top: 2px;
     line-height: 1.4;
@@ -718,17 +766,17 @@
 
   .sign-info-card .sic-row {
     display: flex; gap: 6px; align-items: baseline;
-    font-size: 0.72rem; margin-bottom: 4px;
+    font-size: 0.88rem; margin-bottom: 6px;
     line-height: 1.5;
   }
   .sign-info-card .sic-row:last-child { margin-bottom: 0; }
-  .sign-info-card .sic-label { color: rgba(196,181,253,0.5); min-width: 36px; flex-shrink: 0; }
+  .sign-info-card .sic-label { color: rgba(196,181,253,0.6); min-width: 42px; flex-shrink: 0; }
   .sign-info-card .sic-val { color: rgba(233,213,255,0.85); }
   .sign-info-card .sic-keywords {
     display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px;
   }
   .sign-info-card .kw {
-    font-size: 0.65rem;
+    font-size: 0.8rem;
     background: rgba(107,33,168,0.2);
     border: 1px solid rgba(147,51,234,0.2);
     border-radius: 8px;
@@ -737,11 +785,84 @@
   }
 
   /* 반응형 */
-  @media (max-width: 600px) {
-    .signs-grid { grid-template-columns: 1fr; gap: 14px; }
-    .input-section { padding: 20px; }
-    .wrapper { padding: 24px 16px; }
-    .custom-dropdown { max-height: 260px; }
+  @media (max-width: 768px) {
+    /* 전체 기본 크기 확대 */
+    body { font-size: 17px; }
+    .signs-grid { grid-template-columns: 1fr; gap: 18px; }
+    .input-section { padding: 24px 18px; }
+    .wrapper { padding: 30px 16px; }
+    .custom-dropdown { max-height: 55vh; }
+
+    /* 헤더 */
+    header h1 { font-size: clamp(2rem, 8vw, 2.8rem); }
+    header p.desc { font-size: 1.1rem; line-height: 1.8; }
+    .graphrag-badge { font-size: 0.9rem; padding: 8px 18px; }
+    .subtitle { font-size: 0.9rem; }
+
+    /* 섹션 라벨 */
+    .section-label { font-size: 1rem; }
+
+    /* 카드 라벨 */
+    .card-label { font-size: 1rem; margin-bottom: 12px; }
+
+    /* 드롭다운 트리거 */
+    .custom-trigger { font-size: 1.1rem; padding: 13px 40px 13px 14px; min-height: 50px; }
+
+    /* 드롭다운 항목 */
+    .dropdown-item { padding: 16px 14px; }
+    .dropdown-item .di-symbol { font-size: 1.3rem; }
+    .dropdown-item .di-name { font-size: 1.15rem; }
+    .dropdown-item .di-desc { font-size: 0.95rem; line-height: 1.5; }
+    .dropdown-item .di-badge { font-size: 0.85rem; padding: 3px 9px; }
+
+    /* 선택 후 정보 카드 */
+    .sign-card { padding: 20px; }
+    .sign-info-card { padding: 14px 16px; }
+    .sign-info-card .sic-row { font-size: 1rem; margin-bottom: 7px; }
+    .sign-info-card .kw { font-size: 0.9rem; padding: 4px 10px; }
+
+    /* 고민 입력 */
+    .concern-box label { font-size: 1.05rem; }
+    .concern-box textarea { font-size: 1.05rem; padding: 14px 16px; }
+
+    /* 버튼 */
+    .btn-analyze { font-size: 1.2rem; padding: 20px; border-radius: 14px; }
+    .btn-reset { font-size: 1rem; padding: 15px; }
+
+    /* 에러 */
+    .error-msg { font-size: 1rem; padding: 16px; }
+
+    /* 안내 배너 */
+    .guide-banner { font-size: 1rem; padding: 16px 18px; }
+    .guide-row { font-size: 0.95rem; padding: 8px 0; }
+    .guide-banner .guide-title { font-size: 1rem; }
+
+    /* 결과 카드 */
+    .card-title { font-size: 0.95rem; }
+    .card-body { font-size: 1.1rem; line-height: 2.1; }
+    .analysis-card { padding: 22px; }
+
+    /* 그래프 */
+    .graph-header h3 { font-size: 0.95rem; }
+    #graph-canvas { height: 220px; }
+
+    /* 경로 태그 */
+    .path-tag { font-size: 0.88rem; padding: 6px 14px; }
+
+    /* 공유 버튼 */
+    .btn-kakao { font-size: 1.1rem; padding: 16px 28px; }
+    .btn-copy-link { font-size: 1.1rem; padding: 16px 24px; }
+    .share-title { font-size: 1.05rem; }
+
+    /* 로딩 */
+    .loading-steps { font-size: 0.95rem; }
+
+    /* 그래프 헤더 */
+    .graph-header { padding: 14px 18px; }
+
+    /* path-tag — 이전 규칙 덮어쓰기 */
+    .path-tag { font-size: 0.8rem; }
+    .guide-banner { font-size: 1rem; }
   }
 </style>
 </head>
@@ -776,17 +897,17 @@
         <div class="guide-row">
           <span class="gr-icon">☀️</span>
           <span class="gr-label">태양궁</span>
-          <span class="gr-desc">생년월일로 결정되는 <b style="color:var(--silver)">나의 본질·성격</b>. 가장 잘 알려진 별자리예요. 생일이 몇 월인지만 알면 바로 선택 가능합니다.</span>
+          <span class="gr-desc" style="font-size:0.9rem;line-height:1.7;">생년월일로 결정되는 <b style="color:var(--silver)">나의 본질·성격</b>. 가장 잘 알려진 별자리예요. 생일이 몇 월인지만 알면 바로 선택 가능합니다.</span>
         </div>
         <div class="guide-row">
           <span class="gr-icon">🌙</span>
           <span class="gr-label">달궁</span>
-          <span class="gr-desc">출생 당시 달의 위치. <b style="color:var(--silver)">감정·무의식·속마음</b>을 나타냅니다. 생년월일+출생시간으로 계산해요. 모르면 무료 달궁 계산기를 검색해보세요.</span>
+          <span class="gr-desc" style="font-size:0.9rem;line-height:1.7;">출생 당시 달의 위치. <b style="color:var(--silver)">감정·무의식·속마음</b>을 나타냅니다. 생년월일+출생시간으로 계산해요. 모르면 무료 달궁 계산기를 검색해보세요.</span>
         </div>
         <div class="guide-row">
           <span class="gr-icon">↑</span>
           <span class="gr-label">상승궁</span>
-          <span class="gr-desc">출생 시각의 동쪽 지평선 별자리. <b style="color:var(--silver)">타인에게 보이는 인상·외면</b>. 정확한 출생 시각이 필요하며, 몰라도 분석이 가능해요!</span>
+          <span class="gr-desc" style="font-size:0.9rem;line-height:1.7;">출생 시각의 동쪽 지평선 별자리. <b style="color:var(--silver)">타인에게 보이는 인상·외면</b>. 정확한 출생 시각이 필요하며, 몰라도 분석이 가능해요!</span>
         </div>
       </div>
     </div>
@@ -887,10 +1008,22 @@
     <!-- 분석 카드들 -->
     <div class="analysis-cards" id="analysisCards"></div>
 
-    <!-- 개운 아이템 -->
-    <div class="shop-section">
-      <p id="shopText">✨ 당신의 별자리 에너지에 맞는 개운 아이템을 찾아보세요</p>
-      <a href="#" class="btn-shop" id="shopBtn">🛒 나만의 개운(開運) 아이템 보러가기</a>
+    <!-- 카카오 공유 섹션 -->
+    <div class="share-section">
+      <p class="share-title">✨ 나의 운세 결과를 친구에게 공유해보세요</p>
+      <div class="share-buttons">
+        <button class="btn-kakao" onclick="shareKakao()">
+          <img src="https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_medium.png" 
+               alt="카카오" style="width:22px;height:22px;vertical-align:middle;margin-right:6px;">
+          카카오톡 공유
+        </button>
+        <button class="btn-copy-link" onclick="copyLink()">
+          🔗 링크 복사
+        </button>
+      </div>
+      <p class="share-hint" id="copyMsg" style="display:none;color:#6ee7b7;font-size:0.9rem;margin-top:8px;">
+        ✓ 링크가 복사됐습니다!
+      </p>
     </div>
 
     <button class="btn-reset" onclick="reset()">↺ 다시 분석하기</button>
@@ -1248,6 +1381,10 @@ function hideLoading() {
 
 function showResult(data, sun, moon, rising) {
   document.getElementById('resultSection').classList.add('active');
+  // GA 이벤트: 결과 표시 완료
+  trackEvent('result_shown', '운세결과', '성공');
+  // GA 이벤트: 운세 분석 실행
+  trackEvent('analyze', '운세', sun + '+' + moon + (rising ? '+' + rising : ''));
   drawGraph(sun, moon, rising);
   buildPathTags(sun, moon, rising);
 
@@ -1274,6 +1411,77 @@ function showResult(data, sun, moon, rising) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ===== 카카오톡 공유 =====
+function shareKakao() {
+  const sun    = document.getElementById('sunSign').value;
+  const moon   = document.getElementById('moonSign').value;
+  const rising = document.getElementById('risingSign').value;
+  const signText = sun + (moon ? ' · ' + moon : '') + (rising ? ' · ' + rising : '');
+
+  // GA 이벤트
+  trackEvent('share_kakao', '공유', signText);
+
+  // 카카오 SDK가 로드된 경우
+  if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
+    Kakao.Share.sendDefault({
+      objectType: 'feed',
+      content: {
+        title: '🌌 별자리 운명의 그물 — 나의 운세 결과',
+        description: '[ ' + signText + ' ] 조합의 운세를 확인해보세요! GraphRAG AI가 분석한 심층 운세입니다.',
+        imageUrl: 'https://astro-graphrag-2jty.vercel.app/og-image.png',
+        link: {
+          mobileWebUrl: window.location.href,
+          webUrl: window.location.href,
+        },
+      },
+      buttons: [
+        {
+          title: '나도 운세 보기',
+          link: {
+            mobileWebUrl: window.location.href,
+            webUrl: window.location.href,
+          },
+        },
+      ],
+    });
+  } else {
+    // SDK 미로드 시 — URL 공유로 폴백
+    const shareText = '🌌 별자리 운명의 그물\n' + signText + ' 조합의 AI 심층 운세!\n' + window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: '별자리 운명의 그물', text: shareText, url: window.location.href })
+        .catch(() => copyLink());
+    } else {
+      copyLink();
+    }
+  }
+}
+
+// ===== 링크 복사 =====
+function copyLink() {
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    const msg = document.getElementById('copyMsg');
+    if (msg) {
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 2500);
+    }
+  }).catch(() => {
+    // 구형 브라우저 대응
+    const el = document.createElement('textarea');
+    el.value = url;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    const msg = document.getElementById('copyMsg');
+    if (msg) {
+      msg.style.display = 'block';
+      setTimeout(() => { msg.style.display = 'none'; }, 2500);
+    }
+  });
+  trackEvent('share_link_copy', '공유', '링크복사');
+}
+
 function reset() {
   document.getElementById('resultSection').classList.remove('active');
   document.getElementById('inputSection').style.display = 'block';
@@ -1285,6 +1493,17 @@ function showError(msg) {
   el.textContent = msg;
   el.classList.add('active');
 }
+</script>
+<!-- 카카오 JavaScript SDK -->
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
+  integrity="sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4"
+  crossorigin="anonymous"></script>
+<script>
+  // 카카오 SDK 초기화 — 실제 앱 키로 교체 필요
+  // 발급: https://developers.kakao.com → 앱 만들기 → JavaScript 키 복사
+  if (typeof Kakao !== 'undefined') {
+    Kakao.init('YOUR_KAKAO_JS_KEY');  // ← 여기에 카카오 JavaScript 키 입력
+  }
 </script>
 </body>
 </html>

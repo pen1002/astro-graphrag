@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- Google Analytics GA4 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3EE6EH7355"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-3EE6EH7355');
+  gtag('config', 'G-XXXXXXXXXX');
 
   // 커스텀 이벤트 트래킹 함수
   function trackEvent(action, category, label) {
@@ -1041,9 +1041,7 @@
       <p class="share-title">✨ 나의 운세 결과를 친구에게 공유해보세요</p>
       <div class="share-buttons">
         <button class="btn-kakao" onclick="shareKakao()">
-          <img src="https://developers.kakao.com/assets/img/about/logos/kakaolink/kakaolink_btn_medium.png" 
-               alt="카카오" style="width:22px;height:22px;vertical-align:middle;margin-right:6px;">
-          카카오톡 공유
+          💬  카카오톡 · 공유하기
         </button>
         <button class="btn-copy-link" onclick="copyLink()">
           🔗 링크 복사
@@ -1438,49 +1436,48 @@ function showResult(data, sun, moon, rising) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ===== 카카오톡 공유 =====
+// ===== 카카오톡 / 공유 =====
 function shareKakao() {
-  const sun    = document.getElementById('sunSign').value;
-  const moon   = document.getElementById('moonSign').value;
-  const rising = document.getElementById('risingSign').value;
-  const signText = sun + (moon ? ' · ' + moon : '') + (rising ? ' · ' + rising : '');
+  const sun    = document.getElementById('sunSign').value  || '';
+  const moon   = document.getElementById('moonSign').value || '';
+  const rising = document.getElementById('risingSign').value || '';
+  const signText = [sun, moon, rising].filter(Boolean).join(' · ');
 
-  // GA 이벤트
+  const shareTitle = '🌌 별자리 운명의 그물';
+  const shareText  = '[ ' + signText + ' ] 조합의 AI 심층 운세 결과!\n나만의 별자리 운세를 확인해보세요 ✨';
+  const shareUrl   = 'https://astro-graphrag-2jty.vercel.app';
+
   trackEvent('share_kakao', '공유', signText);
 
-  // 카카오 SDK가 로드된 경우
-  if (typeof Kakao !== 'undefined' && Kakao.isInitialized()) {
-    Kakao.Share.sendDefault({
-      objectType: 'feed',
-      content: {
-        title: '🌌 별자리 운명의 그물 — 나의 운세 결과',
-        description: '[ ' + signText + ' ] 조합의 운세를 확인해보세요! GraphRAG AI가 분석한 심층 운세입니다.',
-        imageUrl: 'https://astro-graphrag-2jty.vercel.app/og-image.png',
-        link: {
-          mobileWebUrl: window.location.href,
-          webUrl: window.location.href,
-        },
-      },
-      buttons: [
-        {
-          title: '나도 운세 보기',
-          link: {
-            mobileWebUrl: window.location.href,
-            webUrl: window.location.href,
-          },
-        },
-      ],
+  // ① 모바일 네이티브 공유 (카카오톡 포함 모든 앱 선택 가능)
+  if (navigator.share) {
+    navigator.share({
+      title: shareTitle,
+      text:  shareText,
+      url:   shareUrl
+    }).catch(() => {
+      // 취소 또는 실패 시 링크 복사로 대체
+      copyLink();
     });
   } else {
-    // SDK 미로드 시 — URL 공유로 폴백
-    const shareText = '🌌 별자리 운명의 그물\n' + signText + ' 조합의 AI 심층 운세!\n' + window.location.href;
-    if (navigator.share) {
-      navigator.share({ title: '별자리 운명의 그물', text: shareText, url: window.location.href })
-        .catch(() => copyLink());
-    } else {
-      copyLink();
-    }
+    // ② PC 등 navigator.share 미지원 → 링크 복사
+    copyLink();
+    showShareToast('링크가 복사됐어요! 카카오톡에 붙여넣기 하세요 💬');
   }
+}
+
+function showShareToast(msg) {
+  const toast = document.createElement('div');
+  toast.textContent = msg;
+  toast.style.cssText = `
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: rgba(107,33,168,0.95); color: #fff; padding: 14px 24px;
+    border-radius: 30px; font-size: 0.95rem; z-index: 99999;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4); white-space: nowrap;
+    animation: fadeInUp 0.3s ease;
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
 }
 
 // ===== 링크 복사 =====
@@ -1521,16 +1518,6 @@ function showError(msg) {
   el.classList.add('active');
 }
 </script>
-<!-- 카카오 JavaScript SDK -->
-<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js"
-  integrity="sha384-TiCUE00h649CAMonG018J2ujOgDKW/kVWlChEuu4jK2vxfAAD0eZxzCKakxg55G4"
-  crossorigin="anonymous"></script>
-<script>
-  // 카카오 SDK 초기화 — 실제 앱 키로 교체 필요
-  // 발급: https://developers.kakao.com → 앱 만들기 → JavaScript 키 복사
-  if (typeof Kakao !== 'undefined') {
-    Kakao.init('80ffeef9cd398bcb734a29f9ce8d3541');  // ← 여기에 카카오 JavaScript 키 입력
-  }
-</script>
+<!-- 카카오 SDK 불필요 (Web Share API 사용) -->
 </body>
 </html>

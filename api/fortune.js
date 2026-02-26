@@ -5,6 +5,7 @@ const https = require('https');
 module.exports = async function (req, res) {
   // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -41,10 +42,16 @@ module.exports = async function (req, res) {
   const moonD   = SIGNS[moon]   || { element:'?', quality:'?', ruler:'?', keywords:[] };
   const risingD = rising ? (SIGNS[rising] || null) : null;
 
-  const systemPrompt = `당신은 서양 점성술 전문가입니다. 반드시 아래 JSON 형식으로만 답변하세요. 다른 텍스트나 마크다운 없이 순수 JSON만 출력하세요.
+  const systemPrompt = `당신은 서양 점성술 전문가입니다. 반드시 아래 JSON 형식으로만 답변하세요. 다른 텍스트나 마크다운 없이 순수 JSON만 출력하세요. 모든 텍스트는 완전한 한국어 유니코드로 작성하세요.
 
-출력 형식:
-{"path_analysis":"(200자 내외)","deep_reading":"(300자 내외)","action_guide":"(개운 행동 3가지, 줄바꿈 구분)","shop_message":"(60자 내외)"}`;
+출력 형식 (반드시 이 키 4개만 포함):
+{"path_analysis":"별자리 관계 분석 200자","deep_reading":"심층 운세 해석 300자","action_guide":"1. 첫번째 행동\n2. 두번째 행동\n3. 세번째 행동","shop_message":"개운 메시지 60자"}
+
+주의사항:
+- action_guide는 번호 매긴 3가지를 \n으로 구분
+- 특수문자 대신 일반 한국어 사용
+- 이모지 사용 가능
+- JSON 외 다른 텍스트 절대 금지`;
 
   const concernText = concern ? `\n사용자 고민: "${concern}"` : '';
   const risingText  = risingD

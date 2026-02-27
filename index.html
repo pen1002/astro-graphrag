@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- Google Analytics GA4 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3EE6EH7355"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-3EE6EH7355');
+  gtag('config', 'G-XXXXXXXXXX');
 
   // 커스텀 이벤트 트래킹 함수
   function trackEvent(action, category, label) {
@@ -626,10 +626,6 @@
   /* ===== 커스텀 드롭다운 ===== */
   .custom-select-wrap {
     position: relative;
-    z-index: 1;
-  }
-  .custom-select-wrap:has(.custom-dropdown.open) {
-    z-index: 9999;
   }
 
   .custom-trigger {
@@ -682,21 +678,19 @@
   }
 
   /* 드롭다운 패널 */
-  .custom-dropdown {
+  /* 드롭다운 포털 - body에 직접 붙음 */
+  .dropdown-portal {
     display: none;
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
+    position: fixed;
     background: #110535;
-    border: 2px solid rgba(147,51,234,0.7);
+    border: 2px solid rgba(147,51,234,0.75);
     border-radius: 14px;
-    z-index: 9999;
-    max-height: 60vh;
+    z-index: 99999;
     overflow-y: auto;
-    box-shadow: 0 16px 56px rgba(0,0,0,0.98), 0 0 0 2px rgba(147,51,234,0.25);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.99), 0 0 0 2px rgba(147,51,234,0.2);
     animation: dropDown 0.18s ease;
   }
+  .dropdown-portal.open { display: block; }
 
   @keyframes dropDown {
     from { opacity: 0; transform: translateY(-6px); }
@@ -871,11 +865,12 @@
     .graph-header { padding: 14px 18px; }
 
     /* 드롭다운 모바일 */
-    .dropdown-item .di-name  { font-size: 1.2rem !important; white-space: nowrap; }
-    .dropdown-item .di-desc  { font-size: 0.95rem !important; line-height: 1.55; white-space: normal; }
-    .dropdown-item .di-badge { font-size: 0.82rem !important; padding: 3px 10px !important; }
+    .dropdown-item .di-name  { font-size: 1.25rem !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dropdown-item .di-desc  { font-size: 0.92rem !important; line-height: 1.5; white-space: normal; }
+    .dropdown-item .di-badge { font-size: 0.8rem !important; padding: 3px 9px !important; white-space: nowrap; }
     .dropdown-item .di-symbol { font-size: 1.4rem !important; }
-    .dropdown-item { padding: 15px 14px !important; gap: 2px 8px !important; }
+    .dropdown-item { padding: 16px 14px !important; gap: 2px 8px !important; }
+    .dropdown-portal { border-radius: 16px !important; }
 
     /* 트리거 버튼 더 크게 */
     .custom-trigger { min-height: 58px !important; font-size: 1.2rem !important; }
@@ -951,7 +946,6 @@
           <div class="custom-trigger" id="sunTrigger" onclick="toggleDropdown('sun')">
             <span class="placeholder">생일로 선택 ▸</span>
           </div>
-          <div class="custom-dropdown" id="sunDropdown"></div>
         </div>
         <input type="hidden" id="sunSign" value="">
         <div class="sign-info-card" id="sunInfo"></div>
@@ -967,7 +961,6 @@
           <div class="custom-trigger" id="moonTrigger" onclick="toggleDropdown('moon')">
             <span class="placeholder">감정 스타일 선택 ▸</span>
           </div>
-          <div class="custom-dropdown" id="moonDropdown"></div>
         </div>
         <input type="hidden" id="moonSign" value="">
         <div class="sign-info-card" id="moonInfo"></div>
@@ -983,7 +976,6 @@
           <div class="custom-trigger" id="risingTrigger" onclick="toggleDropdown('rising')">
             <span class="placeholder">몰라도 괜찮아요 ✓</span>
           </div>
-          <div class="custom-dropdown" id="risingDropdown"></div>
         </div>
         <input type="hidden" id="risingSign" value="">
         <div class="sign-info-card" id="risingInfo"></div>
@@ -1184,10 +1176,55 @@ function buildDropdownItems(type) {
   return html;
 }
 
+// ── 드롭다운 포털 생성 (body에 직접 붙임)
+function createPortal(type) {
+  const existing = document.getElementById(type + 'Dropdown');
+  if (existing) return existing;
+
+  const el = document.createElement('div');
+  el.className = 'dropdown-portal';
+  el.id = type + 'Dropdown';
+  el.innerHTML = buildDropdownItems(type);
+  document.body.appendChild(el);
+  return el;
+}
+
 function initDropdowns() {
-  document.getElementById('sunDropdown').innerHTML    = buildDropdownItems('sun');
-  document.getElementById('moonDropdown').innerHTML   = buildDropdownItems('moon');
-  document.getElementById('risingDropdown').innerHTML = buildDropdownItems('rising');
+  ['sun','moon','rising'].forEach(type => createPortal(type));
+}
+
+function positionDropdown(type) {
+  const dropdown = document.getElementById(type + 'Dropdown');
+  const trigger  = document.getElementById(type + 'Trigger');
+  if (!dropdown || !trigger) return;
+
+  const rect    = trigger.getBoundingClientRect();
+  const padding = 8;
+  const maxH    = Math.min(window.innerHeight * 0.55, 400);
+
+  // 너비: 트리거와 동일, 최소 260px
+  const dropW = Math.max(rect.width, 260);
+  // 왼쪽 위치: 화면 밖으로 나가지 않게
+  let leftPos = rect.left;
+  if (leftPos + dropW > window.innerWidth - padding) {
+    leftPos = window.innerWidth - padding - dropW;
+  }
+  leftPos = Math.max(padding, leftPos);
+
+  // 아래 공간 확인
+  const spaceBelow = window.innerHeight - rect.bottom - padding;
+  let topPos;
+  if (spaceBelow >= 150) {
+    topPos = rect.bottom + 4;
+  } else {
+    // 위로 펼치기
+    topPos = Math.max(padding, rect.top - maxH - 4);
+  }
+
+  dropdown.style.left      = leftPos + 'px';
+  dropdown.style.top       = topPos  + 'px';
+  dropdown.style.width     = dropW   + 'px';
+  dropdown.style.maxHeight = maxH    + 'px';
 }
 
 function toggleDropdown(type) {
@@ -1197,21 +1234,37 @@ function toggleDropdown(type) {
 
   // 모두 닫기
   ['sun','moon','rising'].forEach(t => {
-    document.getElementById(t + 'Dropdown').classList.remove('open');
-    document.getElementById(t + 'Trigger').classList.remove('open');
+    const dd = document.getElementById(t + 'Dropdown');
+    const tr = document.getElementById(t + 'Trigger');
+    if (dd) dd.classList.remove('open');
+    if (tr) tr.classList.remove('open');
   });
 
   if (!isOpen) {
+    positionDropdown(type);
     dropdown.classList.add('open');
     trigger.classList.add('open');
   }
 }
 
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.custom-select-wrap')) {
+// 스크롤/리사이즈 시 열린 드롭다운 위치 재계산
+['scroll','resize'].forEach(ev => {
+  window.addEventListener(ev, function() {
     ['sun','moon','rising'].forEach(t => {
-      document.getElementById(t + 'Dropdown').classList.remove('open');
-      document.getElementById(t + 'Trigger').classList.remove('open');
+      const dd = document.getElementById(t + 'Dropdown');
+      if (dd && dd.classList.contains('open')) positionDropdown(t);
+    });
+  }, { passive: true });
+});
+
+document.addEventListener('click', function(e) {
+  // 트리거 또는 포털 드롭다운 클릭이면 닫지 않음
+  if (!e.target.closest('.custom-select-wrap') && !e.target.closest('.dropdown-portal')) {
+    ['sun','moon','rising'].forEach(t => {
+      const dd = document.getElementById(t + 'Dropdown');
+      const tr = document.getElementById(t + 'Trigger');
+      if (dd) dd.classList.remove('open');
+      if (tr) tr.classList.remove('open');
     });
   }
 });

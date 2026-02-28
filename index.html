@@ -137,6 +137,172 @@
     backdrop-filter: blur(10px);
   }
 
+  /* ── 입력 모드 탭 ── */
+  .mode-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+  .mode-tab {
+    flex: 1;
+    padding: 11px 8px;
+    background: rgba(107,33,168,0.1);
+    border: 1px solid rgba(107,33,168,0.25);
+    border-radius: 12px;
+    color: rgba(196,181,253,0.6);
+    font-size: 0.9rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: center;
+  }
+  .mode-tab.active {
+    background: linear-gradient(135deg, rgba(107,33,168,0.4), rgba(147,51,234,0.25));
+    border-color: var(--aurora);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 0 16px rgba(147,51,234,0.2);
+  }
+  .mode-tab:hover:not(.active) {
+    border-color: rgba(147,51,234,0.4);
+    color: var(--silver);
+  }
+
+  /* ── 생년월일 입력 폼 ── */
+  .birth-form {
+    display: none;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 22px;
+    animation: fadeIn 0.3s ease;
+  }
+  .birth-form.active { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .birth-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .birth-row.two-col { grid-template-columns: 1fr 1fr; }
+
+  .birth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .birth-field label {
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    color: var(--aurora);
+    text-transform: uppercase;
+  }
+  .birth-field input,
+  .birth-field select {
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(107,33,168,0.35);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 1rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    padding: 11px 12px;
+    width: 100%;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .birth-field input:focus,
+  .birth-field select:focus {
+    outline: none;
+    border-color: var(--aurora);
+    box-shadow: 0 0 12px rgba(147,51,234,0.2);
+  }
+  .birth-field select option { background: #1a0a45; color: #fff; }
+
+  .birth-time-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: rgba(196,181,253,0.7);
+    user-select: none;
+  }
+  .birth-time-toggle input[type=checkbox] { display: none; }
+  .toggle-switch {
+    width: 38px; height: 20px;
+    background: rgba(107,33,168,0.3);
+    border: 1px solid rgba(147,51,234,0.4);
+    border-radius: 20px;
+    position: relative;
+    transition: background 0.25s;
+    flex-shrink: 0;
+  }
+  .toggle-switch::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 14px; height: 14px;
+    background: var(--silver);
+    border-radius: 50%;
+    transition: transform 0.25s;
+  }
+  .birth-time-toggle input:checked + .toggle-switch {
+    background: var(--violet);
+    border-color: var(--aurora);
+  }
+  .birth-time-toggle input:checked + .toggle-switch::after {
+    transform: translateX(18px);
+  }
+
+  .birth-time-fields {
+    display: none;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .birth-time-fields.visible { display: grid; }
+
+  /* 계산 결과 미리보기 */
+  .chart-preview {
+    display: none;
+    background: linear-gradient(135deg, rgba(107,33,168,0.15), rgba(147,51,234,0.08));
+    border: 1px solid rgba(147,51,234,0.3);
+    border-radius: 12px;
+    padding: 14px 16px;
+    gap: 8px;
+    flex-direction: column;
+  }
+  .chart-preview.visible { display: flex; }
+  .chart-preview-title {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--aurora);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .chart-preview-signs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .preview-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(147,51,234,0.2);
+    border: 1px solid rgba(196,181,253,0.25);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.9rem;
+    color: var(--star);
+  }
+  .preview-badge .pb-icon { font-size: 1rem; }
+  .preview-badge .pb-label { font-size: 0.72rem; color: var(--silver); }
+
   .section-label {
     font-size: 0.72rem;
     letter-spacing: 0.3em;
@@ -883,6 +1049,15 @@
     /* 카드 라벨 */
     .card-label { font-size: 1.1rem !important; }
 
+    /* 생년월일 폼 모바일 */
+    .birth-row { grid-template-columns: 1fr 1fr; }
+    .birth-row.two-col { grid-template-columns: 1fr 1fr; }
+    .birth-field input, .birth-field select { font-size: 1.05rem !important; padding: 13px 12px !important; }
+    .birth-field label { font-size: 0.85rem !important; }
+    .birth-time-toggle { font-size: 1rem !important; }
+    .mode-tab { font-size: 0.88rem !important; padding: 13px 6px !important; }
+    .preview-badge { font-size: 0.95rem !important; }
+
     /* path-tag — 이전 규칙 덮어쓰기 */
     .path-tag { font-size: 0.8rem; }
     .guide-banner { font-size: 1rem; }
@@ -908,6 +1083,106 @@
   <!-- 입력 섹션 -->
   <div class="input-section" id="inputSection">
     <div class="section-label">나의 세 별자리 입력</div>
+
+    <!-- 입력 모드 탭 -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tabManual" onclick="switchMode('manual')">
+        ☀️ 별자리 직접 선택
+      </button>
+      <button class="mode-tab" id="tabBirth" onclick="switchMode('birth')">
+        🎂 생년월일로 자동 계산
+      </button>
+    </div>
+
+    <!-- 생년월일 입력 폼 (기본 숨김) -->
+    <div class="birth-form" id="birthForm">
+
+      <!-- 생년월일 -->
+      <div class="birth-row">
+        <div class="birth-field">
+          <label>📅 년도</label>
+          <input type="number" id="birthYear" placeholder="예: 1990"
+            min="1900" max="2025" inputmode="numeric"
+            oninput="onBirthChange()">
+        </div>
+        <div class="birth-field">
+          <label>월</label>
+          <select id="birthMonth" onchange="onBirthChange()">
+            <option value="">월 선택</option>
+            <option value="1">1월</option><option value="2">2월</option>
+            <option value="3">3월</option><option value="4">4월</option>
+            <option value="5">5월</option><option value="6">6월</option>
+            <option value="7">7월</option><option value="8">8월</option>
+            <option value="9">9월</option><option value="10">10월</option>
+            <option value="11">11월</option><option value="12">12월</option>
+          </select>
+        </div>
+        <div class="birth-field">
+          <label>일</label>
+          <input type="number" id="birthDay" placeholder="일"
+            min="1" max="31" inputmode="numeric"
+            oninput="onBirthChange()">
+        </div>
+      </div>
+
+      <!-- 출생 시간 토글 -->
+      <label class="birth-time-toggle">
+        <input type="checkbox" id="timeKnown" onchange="toggleTimeFields()">
+        <span class="toggle-switch"></span>
+        ⏰ 출생 시간을 알고 있어요 (상승궁 자동 계산)
+      </label>
+
+      <!-- 시간 필드 (숨김/표시) -->
+      <div class="birth-time-fields" id="timeFields">
+        <div class="birth-field">
+          <label>시간 (0~23)</label>
+          <input type="number" id="birthHour" placeholder="14"
+            min="0" max="23" inputmode="numeric"
+            oninput="onBirthChange()">
+        </div>
+        <div class="birth-field">
+          <label>분 (0~59)</label>
+          <input type="number" id="birthMinute" placeholder="30"
+            min="0" max="59" inputmode="numeric"
+            oninput="onBirthChange()">
+        </div>
+      </div>
+
+      <!-- 출생지 (선택) -->
+      <div class="birth-field">
+        <label>🌏 출생 도시 (상승궁 정밀 계산용, 선택)</label>
+        <select id="birthCity" onchange="onBirthChange()">
+          <option value="37.5665,126.978">서울 / 대한민국</option>
+          <option value="35.1796,129.0756">부산</option>
+          <option value="35.8714,128.6014">대구</option>
+          <option value="37.4563,126.7052">인천</option>
+          <option value="35.1595,126.8526">광주</option>
+          <option value="36.3504,127.3845">대전</option>
+          <option value="35.5384,129.3114">울산</option>
+          <option value="37.2750,127.0094">수원</option>
+          <option value="35.6895,139.6917">도쿄 / 일본</option>
+          <option value="39.9042,116.4074">베이징 / 중국</option>
+          <option value="31.2304,121.4737">상하이 / 중국</option>
+          <option value="1.3521,103.8198">싱가포르</option>
+          <option value="40.7128,-74.006">뉴욕 / 미국</option>
+          <option value="34.0522,-118.2437">LA / 미국</option>
+          <option value="51.5074,-0.1278">런던 / 영국</option>
+          <option value="48.8566,2.3522">파리 / 프랑스</option>
+          <option value="custom">직접 입력 (위도/경도)</option>
+        </select>
+      </div>
+
+      <!-- 계산 결과 미리보기 -->
+      <div class="chart-preview" id="chartPreview">
+        <div class="chart-preview-title">✦ 계산된 출생 차트</div>
+        <div class="chart-preview-signs" id="chartPreviewSigns"></div>
+        <div style="font-size:0.78rem;color:rgba(196,181,253,0.5);margin-top:4px;">
+          ※ 천문 계산 결과 (Swiss Ephemeris 방식)
+        </div>
+      </div>
+
+    </div>
+    <!-- /birth-form -->
 
     <!-- 초보자 안내 배너 -->
     <div class="guide-banner" onclick="this.classList.toggle('open')">
@@ -1401,25 +1676,62 @@ function buildPathTags(sun, moon, rising) {
 
 // ===== 메인 분석 함수 =====
 async function analyze() {
-  const sun = document.getElementById('sunSign').value;
-  const moon = document.getElementById('moonSign').value;
-  const rising = document.getElementById('risingSign').value;
   const concern = document.getElementById('concern').value.trim();
+  const isBirthMode = document.getElementById('tabBirth').classList.contains('active');
 
-  if (!sun || !moon) {
-    showError('태양궁과 달궁을 선택해주세요 ✦');
-    return;
+  let requestBody, sun, moon, rising;
+
+  if (isBirthMode) {
+    // ── 생년월일 자동 계산 모드
+    const year   = parseInt(document.getElementById('birthYear').value);
+    const month  = parseInt(document.getElementById('birthMonth').value);
+    const day    = parseInt(document.getElementById('birthDay').value);
+    if (!year || !month || !day) {
+      showError('생년월일을 입력해주세요 🎂');
+      return;
+    }
+    const known  = document.getElementById('timeKnown').checked;
+    const hour   = known ? (parseInt(document.getElementById('birthHour').value)   || 12) : 12;
+    const minute = known ? (parseInt(document.getElementById('birthMinute').value) || 0)  : 0;
+    const city   = document.getElementById('birthCity').value;
+    let lat = 37.5665, lon = 126.978;
+    if (city && city !== 'custom') { [lat, lon] = city.split(',').map(Number); }
+
+    // 클라이언트 계산으로 별자리 미리 알아두기 (로딩 중 표시용)
+    const chart = calcChart(year, month, day, hour, minute, lat, lon);
+    sun    = chart.sun;
+    moon   = chart.moon;
+    rising = known ? chart.rising : null;
+
+    requestBody = {
+      birth: { year, month, day, hour, minute, lat, lon, tzOffset: 9,
+               timeUnknown: !known },
+      concern
+    };
+  } else {
+    // ── 수동 선택 모드 (기존 방식 그대로)
+    sun    = document.getElementById('sunSign').value;
+    moon   = document.getElementById('moonSign').value;
+    rising = document.getElementById('risingSign').value;
+    if (!sun || !moon) {
+      showError('태양궁과 달궁을 선택해주세요 ✦');
+      return;
+    }
+    requestBody = { sun, moon, rising, concern };
   }
 
   document.getElementById('inputSection').style.display = 'none';
   document.getElementById('resultSection').classList.remove('active');
   showLoading();
 
+  // API 엔드포인트 선택
+  const apiEndpoint = isBirthMode ? '/api/fortune-v2' : '/api/fortune';
+
   try {
-    const response = await fetch('/api/fortune', {
+    const response = await fetch(apiEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sun, moon, rising, concern })
+      body: JSON.stringify(requestBody)
     });
 
     const data = await response.json();
@@ -1558,6 +1870,157 @@ function copyLink() {
   });
   trackEvent('share_link_copy', '공유', '링크복사');
 }
+
+// ══════════════════════════════════════════
+//  🌌 생년월일 천문 계산 엔진 (클라이언트 사이드)
+// ══════════════════════════════════════════
+
+function toJulianDay(year, month, day, hour = 0) {
+  const a = Math.floor((14 - month) / 12);
+  const y = year + 4800 - a;
+  const m = month + 12 * a - 3;
+  const jdn = day + Math.floor((153*m+2)/5) + 365*y
+    + Math.floor(y/4) - Math.floor(y/100) + Math.floor(y/400) - 32045;
+  return jdn - 0.5 + hour / 24;
+}
+
+function calcSunLon(jd) {
+  const n = jd - 2451545.0;
+  const L = (280.460 + 0.9856474*n) % 360;
+  const g = ((357.528 + 0.9856003*n) % 360) * Math.PI / 180;
+  const lam = L + 1.915*Math.sin(g) + 0.020*Math.sin(2*g);
+  return ((lam % 360) + 360) % 360;
+}
+
+function calcMoonLon(jd) {
+  const T  = (jd - 2451545.0) / 36525;
+  const L0 = 218.3164477 + 481267.88123421*T;
+  const M  = 134.9633964 + 477198.8675055*T;
+  const Ms = 357.5291092 + 35999.0502909*T;
+  const F  = 93.2720950  + 483202.0175233*T;
+  const D  = 297.8501921 + 445267.1114034*T;
+  const r  = x => x * Math.PI / 180;
+  const c  = 6.288774*Math.sin(r(M))   + 1.274027*Math.sin(r(2*D-M))
+           + 0.658314*Math.sin(r(2*D))  + 0.213618*Math.sin(r(2*M))
+           - 0.185116*Math.sin(r(Ms))  - 0.114332*Math.sin(r(2*F))
+           + 0.058793*Math.sin(r(2*D-2*M)) + 0.057066*Math.sin(r(2*D-Ms-M))
+           + 0.053322*Math.sin(r(2*D+M))   + 0.045758*Math.sin(r(2*D-Ms));
+  return ((L0 + c) % 360 + 360) % 360;
+}
+
+function calcAscendant(jd, lat, lon) {
+  const T    = (jd - 2451545.0) / 36525;
+  let gmst   = 280.46061837 + 360.98564736629*(jd-2451545.0) + 0.000387933*T*T;
+  gmst = ((gmst % 360) + 360) % 360;
+  const lst  = ((gmst + lon) % 360 + 360) % 360;
+  const eps  = 23.439291111 - 0.013004167*T;
+  const r    = x => x * Math.PI / 180;
+  const d    = x => x * 180 / Math.PI;
+  const asc  = Math.atan2(
+    Math.cos(r(lst)),
+    -(Math.sin(r(lst))*Math.cos(r(eps)) + Math.tan(r(lat))*Math.sin(r(eps)))
+  );
+  return ((d(asc) % 360) + 360) % 360;
+}
+
+const SIGN_NAMES = [
+  '양자리','황소자리','쌍둥이자리','게자리','사자자리','처녀자리',
+  '천칭자리','전갈자리','사수자리','염소자리','물병자리','물고기자리'
+];
+const SIGN_EMOJI = {
+  '양자리':'♈','황소자리':'♉','쌍둥이자리':'♊','게자리':'♋',
+  '사자자리':'♌','처녀자리':'♍','천칭자리':'♎','전갈자리':'♏',
+  '사수자리':'♐','염소자리':'♑','물병자리':'♒','물고기자리':'♓'
+};
+
+function lonToSign(lon) {
+  return SIGN_NAMES[Math.floor(((lon%360)+360)%360/30)];
+}
+
+function calcChart(year, month, day, hour=12, minute=0, lat=37.5665, lon=126.978) {
+  const hourUTC = hour - 9 + minute/60;  // KST → UTC
+  const jd = toJulianDay(year, month, day, hourUTC);
+  return {
+    sun:    lonToSign(calcSunLon(jd)),
+    moon:   lonToSign(calcMoonLon(jd)),
+    rising: lonToSign(calcAscendant(jd, lat, lon)),
+    jd
+  };
+}
+
+// ── 탭 전환
+function switchMode(mode) {
+  const tabManual = document.getElementById('tabManual');
+  const tabBirth  = document.getElementById('tabBirth');
+  const birthForm = document.getElementById('birthForm');
+  const signsGrid = document.querySelector('.signs-grid');
+
+  if (mode === 'birth') {
+    tabBirth.classList.add('active');
+    tabManual.classList.remove('active');
+    birthForm.classList.add('active');
+    signsGrid.style.display = 'none';
+  } else {
+    tabManual.classList.add('active');
+    tabBirth.classList.remove('active');
+    birthForm.classList.remove('active');
+    signsGrid.style.display = '';
+  }
+}
+
+// ── 시간 토글
+function toggleTimeFields() {
+  const known  = document.getElementById('timeKnown').checked;
+  const fields = document.getElementById('timeFields');
+  fields.classList.toggle('visible', known);
+  onBirthChange();
+}
+
+// ── 생년월일 변경 시 실시간 계산
+function onBirthChange() {
+  const year   = parseInt(document.getElementById('birthYear').value);
+  const month  = parseInt(document.getElementById('birthMonth').value);
+  const day    = parseInt(document.getElementById('birthDay').value);
+  const known  = document.getElementById('timeKnown').checked;
+  const hour   = known ? (parseInt(document.getElementById('birthHour').value)   || 12) : 12;
+  const minute = known ? (parseInt(document.getElementById('birthMinute').value) || 0)  : 0;
+  const city   = document.getElementById('birthCity').value;
+
+  if (!year || !month || !day || year < 1900 || year > 2025) return;
+  if (month < 1 || month > 12 || day < 1 || day > 31) return;
+
+  let lat = 37.5665, lon = 126.978;
+  if (city && city !== 'custom') {
+    [lat, lon] = city.split(',').map(Number);
+  }
+
+  const chart = calcChart(year, month, day, hour, minute, lat, lon);
+
+  // 미리보기 표시
+  const preview = document.getElementById('chartPreview');
+  const signs   = document.getElementById('chartPreviewSigns');
+  preview.classList.add('visible');
+
+  const items = [
+    { icon:'☀️', label:'태양궁', sign: chart.sun },
+    { icon:'🌙', label:'달궁',   sign: chart.moon },
+  ];
+  if (known) items.push({ icon:'↑', label:'상승궁', sign: chart.rising });
+
+  signs.innerHTML = items.map(it => `
+    <div class="preview-badge">
+      <span class="pb-icon">${it.icon}</span>
+      <div>
+        <div style="font-weight:700">${SIGN_EMOJI[it.sign] || ''} ${it.sign}</div>
+        <div class="pb-label">${it.label}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════
+//  analyze() 함수 확장 — 생년월일 모드 지원
+// ══════════════════════════════════════════
 
 function reset() {
   document.getElementById('resultSection').classList.remove('active');

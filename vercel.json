@@ -1,23 +1,13 @@
 {
   "version": 2,
   "builds": [
-    {
-      "src": "api/fortune.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "index.html",
-      "use": "@vercel/static"
-    }
+    { "src": "api/fortune.js",    "use": "@vercel/node" },
+    { "src": "api/fortune-v2.js", "use": "@vercel/node" },
+    { "src": "index.html",        "use": "@vercel/static" }
   ],
   "routes": [
-    {
-      "src": "/api/fortune",
-      "dest": "/api/fortune.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+    { "src": "/api/fortune-v2", "dest": "/api/fortune-v2.js" },
+    { "src": "/api/fortune",    "dest": "/api/fortune.js"    },
+    { "src": "/(.*)",           "dest": "/index.html"        }
   ]
 }

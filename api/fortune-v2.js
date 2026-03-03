@@ -191,7 +191,7 @@ const SIGNS = {
 function callClaudeAPI(apiKey, systemPrompt, userPrompt) {
   const body = JSON.stringify({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 1200,
+    max_tokens: 2000,
     system: systemPrompt,
     messages: [{ role: 'user', content: userPrompt }]
   });
@@ -303,10 +303,26 @@ ${concern ? `\n사용자 고민: "${concern}"` : ''}
 GraphRAG 방식으로 세 별자리의 에너지 관계망을 분석하고 운명의 흐름을 해석하세요.`;
 
     try {
-      const raw   = await callClaudeAPI(apiKey, systemPrompt, userPrompt);
-      const match = raw.match(/```json\s*([\s\S]*?)```/) || raw.match(/(\{[\s\S]*\})/);
-      const jsonStr = match ? match[1].trim() : raw;
-      const result  = JSON.parse(jsonStr);
+      const raw = await callClaudeAPI(apiKey, systemPrompt, userPrompt);
+      let jsonStr = raw;
+      const mdMatch  = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+      const objMatch = raw.match(/(\{[\s\S]*\})/);
+      if (mdMatch)       jsonStr = mdMatch[1].trim();
+      else if (objMatch) jsonStr = objMatch[1].trim();
+
+      // 잘린 JSON 복구
+      if (!jsonStr.endsWith('}')) {
+        const lc = jsonStr.lastIndexOf(',');
+        const lb = jsonStr.lastIndexOf('}');
+        jsonStr = lc > lb ? jsonStr.substring(0, lc) + '}' : jsonStr + '"}';
+      }
+
+      const result = JSON.parse(jsonStr);
+
+      // 필수 키 보장
+      if (!result.path_analysis) result.path_analysis = '별자리 에너지 분석 중 오류가 발생했습니다.';
+      if (!result.deep_reading)  result.deep_reading  = '심층 운세를 불러오는 중 문제가 생겼습니다.';
+      if (!result.action_guide)  result.action_guide  = '1. 내면의 소리에 귀 기울여보세요\n2. 오늘 감사한 것을 적어보세요\n3. 소중한 사람과 시간을 보내세요';
 
       return res.status(200).json({
         ...result,

@@ -2940,11 +2940,9 @@
     }
     
     async function callClaudeVisionAPI(base64Image, mimeType = 'image/jpeg') {
-        // API 호출은 Vercel Serverless Function을 통해 안전하게 처리됨
         console.log('🔄 AI 분석 시작...');
         
         try {
-            console.log('📡 API 호출 중:', MEAL_ANALYSIS_API);
             const response = await fetch(MEAL_ANALYSIS_API, {
                 method: 'POST',
                 headers: {
@@ -2958,40 +2956,31 @@
             
             console.log('📥 응답 상태:', response.status);
             
-            // 404 에러 - API 파일이 없음
+            // 404 에러 - API 파일이 없음 (JSON 파싱하지 않음!)
             if (response.status === 404) {
-                console.error('❌ API 파일을 찾을 수 없습니다 (404)');
-                console.error('💡 해결방법: api/analyze-meal.js 파일이 Vercel에 배포되었는지 확인하세요.');
                 throw new Error('API_NOT_FOUND');
             }
             
-            // 500 에러 - 서버 오류
-            if (response.status === 500) {
-                console.error('❌ 서버 오류 (500)');
-                console.error('💡 해결방법: Vercel에 CLAUDE_API_KEY 환경변수를 설정했는지 확인하세요.');
-                throw new Error('SERVER_ERROR');
-            }
-            
+            // 200이 아닌 다른 에러
             if (!response.ok) {
-                // JSON 응답인지 확인
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    const errorData = await response.json();
-                    console.error('❌ API 오류:', errorData);
-                    throw new Error(errorData.error || errorData.details || 'Analysis failed');
-                } else {
-                    throw new Error(`HTTP_ERROR_${response.status}`);
-                }
+                throw new Error('API_ERROR_' + response.status);
             }
             
-            const data = await response.json();
-            console.log('✅ 분석 성공:', data.analysis?.foodName);
+            // 성공 시에만 JSON 파싱
+            let data;
+            try {
+                data = await response.json();
+            } catch (parseError) {
+                console.error('JSON 파싱 실패:', parseError);
+                throw new Error('INVALID_JSON');
+            }
             
             if (data.success && data.analysis) {
+                console.log('✅ 분석 성공:', data.analysis.foodName);
                 return data.analysis;
             }
             
-            throw new Error('Invalid response format');
+            throw new Error('INVALID_RESPONSE');
             
         } catch (error) {
             console.error('❌ API 호출 실패:', error.message);
@@ -3008,20 +2997,30 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ test: true })
             });
+            
+            if (response.status === 404) {
+                console.error('❌ API 파일이 없습니다 (404)');
+                console.log('💡 GitHub에 api/analyze-meal.js 파일을 업로드하세요.');
+                console.log('💡 폴더 구조: api/analyze-meal.js (api 폴더 안에 파일)');
+                return null;
+            }
+            
+            if (!response.ok) {
+                console.error('❌ 서버 에러:', response.status);
+                return null;
+            }
+            
             const data = await response.json();
             console.log('📥 테스트 응답:', data);
             
             if (data.error === 'Image data is required') {
-                console.log('✅ API 서버 연결 성공! (이미지 없이 테스트)');
-                console.log('💡 Vercel 환경변수 CLAUDE_API_KEY 설정 여부는 실제 이미지로 테스트해야 확인 가능');
+                console.log('✅ API 서버 연결 성공!');
             } else if (data.error === 'Server configuration error') {
                 console.error('❌ CLAUDE_API_KEY가 Vercel에 설정되지 않았습니다!');
-                console.log('💡 Vercel Dashboard → Settings → Environment Variables → CLAUDE_API_KEY 추가');
             }
             return data;
         } catch (error) {
             console.error('❌ API 연결 실패:', error.message);
-            console.log('💡 api/analyze-meal.js 파일이 올바르게 배포되었는지 확인하세요.');
             return null;
         }
     };

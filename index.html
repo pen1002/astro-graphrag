@@ -1639,11 +1639,20 @@ function drawGraph(sun, moon, rising) {
 
   const data = { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) };
   const options = {
-    physics: { stabilization: { iterations: 100 }, barnesHut: { gravitationalConstant: -3000, springLength: 120 } },
-    interaction: { hover: true, tooltipDelay: 200 },
+    physics: {
+      stabilization: { iterations: 120, fit: true },
+      barnesHut: { gravitationalConstant: -3000, springLength: 130, springConstant: 0.04 }
+    },
+    interaction: { hover: true, tooltipDelay: 200, zoomView: false },
     layout: { improvedLayout: true },
-    edges: { smooth: { type: 'curvedCW', roundness: 0.2 }, arrows: { to: false }, width: 1.5 },
-    background: { color: 'transparent' },
+    nodes: { borderWidth: 1.5 },
+    edges: {
+      smooth: { type: 'curvedCW', roundness: 0.2 },
+      arrows: { to: false },
+      width: 1.5
+      // background 옵션 제거 — vis-network edges에서 미지원
+    }
+    // background 최상위 제거 — vis-network Network에서 미지원
   };
 
   container.innerHTML = '';
@@ -1744,6 +1753,25 @@ async function analyze() {
     }
 
     hideLoading();
+
+    // ── 디버그: 콘솔에 응답 기록
+    console.group('🌌 API 응답 확인');
+    console.log('전체 응답:', data);
+    console.log('path_analysis:', data.path_analysis ? data.path_analysis.substring(0,50)+'...' : '❌ 없음');
+    console.log('deep_reading:', data.deep_reading ? data.deep_reading.substring(0,50)+'...' : '❌ 없음');
+    console.log('action_guide:', data.action_guide ? '✅ 있음' : '❌ 없음');
+    console.groupEnd();
+
+    // ── 데이터 비어있으면 에러 표시
+    if (!data.path_analysis && !data.deep_reading && !data.action_guide) {
+      document.getElementById('inputSection').style.display = 'block';
+      const errDetail = data.error
+        ? data.error
+        : '응답 키 없음: ' + Object.keys(data).join(', ');
+      showError('⚠️ 운세 데이터 오류: ' + errDetail);
+      return;
+    }
+
     showResult(data, sun, moon, rising);
 
   } catch (err) {

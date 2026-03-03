@@ -42,16 +42,11 @@ module.exports = async function (req, res) {
   const moonD   = SIGNS[moon]   || { element:'?', quality:'?', ruler:'?', keywords:[] };
   const risingD = rising ? (SIGNS[rising] || null) : null;
 
-  const systemPrompt = `당신은 서양 점성술 전문가입니다. 반드시 아래 JSON 형식으로만 답변하세요. 다른 텍스트나 마크다운 없이 순수 JSON만 출력하세요. 모든 텍스트는 완전한 한국어 유니코드로 작성하세요.
+  const systemPrompt = `당신은 서양 점성술 전문가입니다. 아래 JSON 형식으로만 답변하세요. 마크다운 없이 순수 JSON만 출력하세요.
 
-출력 형식 (반드시 이 키 4개만 포함):
-{"path_analysis":"별자리 관계 분석 200자","deep_reading":"심층 운세 해석 300자","action_guide":"1. 첫번째 행동\n2. 두번째 행동\n3. 세번째 행동","shop_message":"개운 메시지 60자"}
+{"path_analysis":"세 별자리 관계 분석 (200자)","deep_reading":"심층 운세 해석 (300자)","action_guide":"1. 개운 행동 첫번째\n2. 개운 행동 두번째\n3. 개운 행동 세번째"}
 
-주의사항:
-- action_guide는 번호 매긴 3가지를 \n으로 구분
-- 특수문자 대신 일반 한국어 사용
-- 이모지 사용 가능
-- JSON 외 다른 텍스트 절대 금지`;
+규칙: JSON 3개 키만 출력. 한국어 완전히 작성. 다른 텍스트 절대 금지.`;
 
   const concernText = concern ? `\n사용자 고민: "${concern}"` : '';
   const risingText  = risingD
@@ -65,7 +60,7 @@ module.exports = async function (req, res) {
 
   const body = JSON.stringify({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 1024,
+    max_tokens: 2000,
     system: systemPrompt,
     messages: [{ role: 'user', content: userPrompt }]
   });
@@ -100,16 +95,44 @@ module.exports = async function (req, res) {
           const aiData = JSON.parse(data);
           const raw = aiData.content[0].text.trim();
 
-          // JSON 추출 (마크다운 코드블록 대응)
-          const jsonMatch = raw.match(/```json\s*([\s\S]*?)```/) || raw.match(/(\{[\s\S]*\})/);
-          const jsonStr = jsonMatch ? jsonMatch[1].trim() : raw;
-          const result  = JSON.parse(jsonStr);
+          // JSON 추출 — 마크다운 코드블록, 일반 JSON 모두 대응
+          let jsonStr = raw;
+          const mdMatch  = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+          const objMatch = raw.match(/(\{[\s\S]*\})/);
+          if (mdMatch)       jsonStr = mdMatch[1].trim();
+          else if (objMatch) jsonStr = objMatch[1].trim();
+
+          // 잘린 JSON 복구 시도
+          if (!jsonStr.endsWith('}')) {
+            const lastComma = jsonStr.lastIndexOf(',');
+            const lastBrace = jsonStr.lastIndexOf('}');
+            if (lastComma > lastBrace) {
+              jsonStr = jsonStr.substring(0, lastComma) + '}';
+            } else {
+              jsonStr = jsonStr + '"}';
+            }
+          }
+
+          const result = JSON.parse(jsonStr);
+
+          // 필수 키 보장
+          if (!result.path_analysis) result.path_analysis = '별자리 관계 분석 중 오류가 발생했습니다.';
+          if (!result.deep_reading)  result.deep_reading  = '심층 운세 해석 중 오류가 발생했습니다.';
+          if (!result.action_guide)  result.action_guide  = '1. 명상으로 내면을 정돈하세요\n2. 자연 속에서 에너지를 충전하세요\n3. 소중한 사람과 시간을 보내세요';
 
           res.status(200).json(result);
           resolve();
         } catch (e) {
-          console.error('파싱 오류:', e, 'Raw:', data);
-          res.status(500).json({ error: '⚠️ AI 응답 처리 오류. 다시 시도해주세요.', debug: data.substring(0, 200) });
+          console.error('파싱 오류:', e, '\nRaw:', data);
+          // 파싱 실패해도 기본 응답 반환
+          res.status(200).json({
+            path_analysis: '운세 분석을 불러오는 중 잠시 문제가 생겼습니다. 다시 시도해주세요.',
+            deep_reading:  '별자리 에너지가 활발히 작동 중입니다. 잠시 후 다시 시도해 주세요.',
+            action_guide:  '1. 깊게 숨을 쉬고 내면의 소리에 귀 기울여 보세요\n2. 오늘 하루 감사한 것 3가지를 적어보세요\n3. 소중한 사람에게 연락해 보세요'
+          });
+          resolve();
+          return;
+          // 원래 에러: ⚠️ AI 응답 처리 오류. 다시 시도해주세요.', debug: data.substring(0, 200) });
           resolve();
         }
       });
